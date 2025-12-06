@@ -1,0 +1,36 @@
+﻿<!-- tienda/templates/tienda/destacados.html -->
+{% extends 'base.html' %}
+
+{% block title %}Productos Destacados - FÃºtbol Store{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="section-title">ðŸŒŸ Productos Destacados</h1>
+            <p class="lead">Los productos mÃ¡s populares y mejor valorados por nuestros clientes</p>
+        </div>
+    </div>
+
+    {% if productos %}
+    <div class="row row-cols-1 row-cols-md-4 g-4">
+        {% for producto in productos %}
+        <div class="col">
+            {% include 'tienda/partials/producto_card.html' %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="row">
+        <div class="col-12">
+            <div class="alert alert-info text-center py-5">
+                <i class="fas fa-star fa-3x mb-3"></i>
+                <h4>No hay productos destacados</h4>
+                <p>Pronto seleccionaremos nuestros productos destacados.</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

@@ -1,0 +1,354 @@
+﻿<!DOCTYPE html>
+<html lang="es" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Fútbol Store - Tu tienda de fútbol{% endblock %}</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- CSS Personalizado -->
+    <style>
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            padding-top: 76px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background-color: #f8f9fa;
+        }
+        
+        .main-content {
+            flex: 1 0 auto;
+            padding-bottom: 2rem;
+        }
+        
+        .navbar {
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .navbar-brand {
+            font-weight: 800;
+            font-size: 1.8rem;
+            color: #0d6efd !important;
+        }
+        
+        .nav-link {
+            font-weight: 500;
+            padding: 0.5rem 1rem !important;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        .nav-link:hover {
+            background-color: rgba(13, 110, 253, 0.1);
+        }
+        
+        .nav-link.active {
+            background-color: rgba(13, 110, 253, 0.15);
+            color: #0d6efd !important;
+        }
+        
+        .product-card {
+            transition: all 0.3s ease;
+            border: none;
+            border-radius: 15px;
+            overflow: hidden;
+            background: white;
+        }
+        
+        .product-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15) !important;
+        }
+        
+        .product-img {
+            height: 220px;
+            object-fit: cover;
+            transition: transform 0.5s;
+        }
+        
+        .product-card:hover .product-img {
+            transform: scale(1.05);
+        }
+        
+        .badge-oferta {
+            background: linear-gradient(45deg, #ff416c, #ff4b2b);
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 0.4rem 0.8rem;
+        }
+        
+        .badge-nuevo {
+            background: linear-gradient(45deg, #11998e, #38ef7d);
+            color: white;
+            font-size: 0.85rem;
+            font-weight: 600;
+            padding: 0.4rem 0.8rem;
+        }
+        
+        .footer {
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: white;
+            margin-top: auto;
+        }
+        
+        .footer a {
+            color: #ddd;
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            color: white;
+            text-decoration: underline;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(45deg, #0d6efd, #0a58ca);
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            padding: 0.6rem 1.5rem;
+        }
+        
+        .section-title {
+            position: relative;
+            padding-bottom: 15px;
+            margin-bottom: 30px;
+        }
+        
+        .section-title:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 80px;
+            height: 4px;
+            background: linear-gradient(45deg, #0d6efd, #0dcaf0);
+            border-radius: 2px;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding-top: 66px;
+            }
+            .product-img {
+                height: 180px;
+            }
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white fixed-top shadow">
+        <div class="container">
+            <!-- Logo -->
+            <a class="navbar-brand" href="/">
+                <i class="fas fa-futbol me-2"></i>
+                <span class="fw-bold">Fútbol</span>Store
+            </a>
+            
+            <!-- Botón móvil -->
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMain">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <!-- Menú principal -->
+            <div class="collapse navbar-collapse" id="navbarMain">
+                <ul class="navbar-nav mx-auto">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/">
+                            <i class="fas fa-home me-1"></i>Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'tienda:productos' %}">
+                            <i class="fas fa-store me-1"></i>Tienda
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'tienda:ofertas' %}">
+                            <i class="fas fa-fire me-1 text-danger"></i>Ofertas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'tienda:categorias' %}">
+                            <i class="fas fa-list me-1"></i>Categorías
+                        </a>
+                    </li>
+                </ul>
+                
+                <!-- Carrito y usuario -->
+                <div class="d-flex align-items-center">
+                    <!-- Buscador -->
+                    <form class="d-flex me-3" action="{% url 'tienda:buscar' %}" method="GET">
+                        <div class="input-group">
+                            <input type="text" class="form-control form-control-sm" placeholder="Buscar..." name="q">
+                            <button class="btn btn-outline-primary btn-sm" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </div>
+                    </form>
+                    
+                    <!-- Usuario -->
+                    {% if user.is_authenticated %}
+                    <div class="dropdown me-3">
+                        <button class="btn btn-outline-primary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-1"></i>{{ user.username }}
+                        </button>
+                        <ul class="dropdown-menu shadow">
+                            <li><a class="dropdown-item" href="{% url 'usuarios:perfil' %}">
+                                <i class="fas fa-user-circle me-2"></i>Mi Perfil
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'usuarios:mis_pedidos' %}">
+                                <i class="fas fa-shopping-bag me-2"></i>Mis Pedidos
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'usuarios:logout' %}">
+                                <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión
+                            </a></li>
+                        </ul>
+                    </div>
+                    {% else %}
+                    <div class="me-3">
+                        <a href="{% url 'usuarios:login' %}" class="btn btn-outline-primary btn-sm me-2">
+                            <i class="fas fa-sign-in-alt me-1"></i>Ingresar
+                        </a>
+                        <a href="{% url 'usuarios:registro' %}" class="btn btn-primary btn-sm">
+                            <i class="fas fa-user-plus me-1"></i>Registrarse
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Carrito -->
+                    <a href="{% url 'carrito:ver_carrito' %}" class="btn btn-primary btn-sm position-relative">
+                        <i class="fas fa-shopping-cart"></i>
+                        {% if request.session.carrito %}
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger">
+                            {{ request.session.carrito|length }}
+                        </span>
+                        {% endif %}
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Notificaciones -->
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {% if message.tags == "success" %}
+            <i class="fas fa-check-circle me-2"></i>
+            {% elif message.tags == "error" %}
+            <i class="fas fa-exclamation-circle me-2"></i>
+            {% else %}
+            <i class="fas fa-info-circle me-2"></i>
+            {% endif %}
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Contenido principal -->
+    <main class="main-content">
+        <div class="container mt-4">
+            {% block content %}
+            {% endblock %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer py-5 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h4 class="fw-bold mb-4">
+                        <i class="fas fa-futbol me-2"></i>FútbolStore
+                    </h4>
+                    <p class="text-light mb-4">
+                        Tu tienda de fútbol online. Calidad garantizada.
+                    </p>
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h5 class="fw-bold mb-4">TIENDA</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="/" class="text-light text-decoration-none">Inicio</a></li>
+                        <li class="mb-2"><a href="{% url 'tienda:productos' %}" class="text-light text-decoration-none">Productos</a></li>
+                        <li class="mb-2"><a href="{% url 'tienda:ofertas' %}" class="text-light text-decoration-none">Ofertas</a></li>
+                        <li><a href="{% url 'tienda:categorias' %}" class="text-light text-decoration-none">Categorías</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h5 class="fw-bold mb-4">AYUDA</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><a href="#" class="text-light text-decoration-none">Contacto</a></li>
+                        <li class="mb-2"><a href="#" class="text-light text-decoration-none">Preguntas Frecuentes</a></li>
+                    </ul>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h5 class="fw-bold mb-4">CONTACTO</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <i class="fas fa-map-marker-alt me-2 text-primary"></i>
+                            <span class="text-light">Av. Fútbol 1234, Ciudad</span>
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-phone me-2 text-success"></i>
+                            <span class="text-light">+1 234 567 890</span>
+                        </li>
+                        <li class="mb-3">
+                            <i class="fas fa-envelope me-2 text-warning"></i>
+                            <span class="text-light">info@futbolstore.com</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <hr class="bg-light my-4">
+            
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0 text-light">
+                        &copy; 2023 FútbolStore. Todos los derechos reservados.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Scripts personalizados -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // Cerrar automáticamente alerts después de 5 segundos
+            setTimeout(() => {
+                document.querySelectorAll(".alert").forEach(alert => {
+                    const bsAlert = new bootstrap.Alert(alert);
+                    bsAlert.close();
+                });
+            }, 5000);
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,184 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Registro{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-success text-white text-center py-3">
+                    <h3 class="mb-0">
+                        <i class="fas fa-user-plus me-2"></i>
+                        Crear Cuenta Nueva
+                    </h3>
+                </div>
+                
+                <div class="card-body p-4">
+                    {% if messages %}
+                    <div class="mb-3">
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            <i class="fas fa-{% if message.tags == 'success' %}check-circle{% else %}exclamation-triangle{% endif %} me-2"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_username" class="form-label fw-bold">
+                                    <i class="fas fa-user me-1"></i> Nombre de Usuario *
+                                </label>
+                                <input type="text" 
+                                       name="username" 
+                                       id="id_username"
+                                       class="form-control form-control-lg"
+                                       placeholder="Ej: juan123"
+                                       required
+                                       autofocus>
+                                <small class="form-text text-muted">
+                                    Mínimo 3 caracteres. No puede contener espacios.
+                                </small>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="id_email" class="form-label fw-bold">
+                                    <i class="fas fa-envelope me-1"></i> Email (Opcional)
+                                </label>
+                                <input type="email" 
+                                       name="email" 
+                                       id="id_email"
+                                       class="form-control form-control-lg"
+                                       placeholder="tucorreo@ejemplo.com">
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_password1" class="form-label fw-bold">
+                                    <i class="fas fa-lock me-1"></i> Contraseña *
+                                </label>
+                                <input type="password" 
+                                       name="password1" 
+                                       id="id_password1"
+                                       class="form-control form-control-lg"
+                                       placeholder="Escribe tu contraseña"
+                                       required>
+                                <small class="form-text text-muted">
+                                    Mínimo 3 caracteres. Puedes usar cualquier cosa.
+                                </small>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="id_password2" class="form-label fw-bold">
+                                    <i class="fas fa-lock me-1"></i> Confirmar Contraseña *
+                                </label>
+                                <input type="password" 
+                                       name="password2" 
+                                       id="id_password2"
+                                       class="form-control form-control-lg"
+                                       placeholder="Repite tu contraseña"
+                                       required>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="id_telefono" class="form-label fw-bold">
+                                    <i class="fas fa-phone me-1"></i> Teléfono (Opcional)
+                                </label>
+                                <input type="text" 
+                                       name="telefono" 
+                                       id="id_telefono"
+                                       class="form-control form-control-lg"
+                                       placeholder="Ej: 123456789">
+                            </div>
+                        </div>
+                        
+                        <div class="d-grid gap-2 mb-3">
+                            <button type="submit" class="btn btn-success btn-lg py-3">
+                                <i class="fas fa-check-circle me-2"></i>
+                                Crear Cuenta
+                            </button>
+                        </div>
+                        
+                        <div class="text-center mt-4">
+                            <p class="mb-0">¿Ya tienes una cuenta?</p>
+                            <a href="{% url 'usuarios:login' %}" class="btn btn-outline-primary btn-lg mt-2">
+                                <i class="fas fa-sign-in-alt me-2"></i>
+                                Iniciar Sesión
+                            </a>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="card-footer text-center py-3 bg-light">
+                    <h5 class="mb-2">Ejemplos que SÍ funcionan:</h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="bg-white p-2 rounded mb-2">
+                                <strong>Usuario:</strong> juan123<br>
+                                <strong>Contraseña:</strong> 123<br>
+                                <small class="text-muted">(¡Sí, solo "123" funciona!)</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="bg-white p-2 rounded mb-2">
+                                <strong>Usuario:</strong> maria_g<br>
+                                <strong>Contraseña:</strong> abc<br>
+                                <small class="text-muted">(¡Sí, solo "abc" funciona!)</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Auto-rellenar para pruebas rápidas
+    if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+        document.getElementById('id_username').value = 'usuario_' + Math.floor(Math.random() * 1000);
+        document.getElementById('id_password1').value = '123';
+        document.getElementById('id_password2').value = '123';
+    }
+    
+    // Validación simple
+    const form = document.querySelector('form');
+    form.addEventListener('submit', function(e) {
+        const username = document.getElementById('id_username').value.trim();
+        const password1 = document.getElementById('id_password1').value.trim();
+        const password2 = document.getElementById('id_password2').value.trim();
+        
+        if (!username || username.length < 3) {
+            e.preventDefault();
+            alert('El usuario debe tener al menos 3 caracteres');
+            return false;
+        }
+        
+        if (!password1 || password1.length < 3) {
+            e.preventDefault();
+            alert('La contraseña debe tener al menos 3 caracteres');
+            return false;
+        }
+        
+        if (password1 !== password2) {
+            e.preventDefault();
+            alert('Las contraseñas no coinciden');
+            return false;
+        }
+    });
+});
+</script>
+{% endblock %}

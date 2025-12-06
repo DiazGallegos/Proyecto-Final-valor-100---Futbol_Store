@@ -1,0 +1,91 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Mis Pedidos - Futbol Store{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1 class="h2 mb-0"><i class="fas fa-shopping-bag me-2"></i>Mis Pedidos</h1>
+        <a href="{% url 'tienda:productos' %}" class="btn btn-outline-primary">
+            <i class="fas fa-store me-2"></i>Seguir Comprando
+        </a>
+    </div>
+    
+    {% if pedidos %}
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th># Pedido</th>
+                            <th>Fecha</th>
+                            <th>Total</th>
+                            <th>Estado</th>
+                            <th>Método de Pago</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for pedido in pedidos %}
+                        <tr>
+                            <td><strong>#{{ pedido.id }}</strong></td>
+                            <td>{{ pedido.fecha_pedido|date:"d/m/Y H:i" }}</td>
+                            <td class="fw-bold text-primary">${{ pedido.total }}</td>
+                            <td>
+                                {% if pedido.estado == "PENDIENTE" %}
+                                <span class="badge bg-warning">Pendiente</span>
+                                {% elif pedido.estado == "PROCESANDO" %}
+                                <span class="badge bg-info">Procesando</span>
+                                {% elif pedido.estado == "ENVIADO" %}
+                                <span class="badge bg-primary">Enviado</span>
+                                {% elif pedido.estado == "ENTREGADO" %}
+                                <span class="badge bg-success">Entregado</span>
+                                {% elif pedido.estado == "CANCELADO" %}
+                                <span class="badge bg-danger">Cancelado</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="badge bg-secondary">{{ pedido.get_metodo_pago_display }}</span>
+                            </td>
+                            <td>
+                                <a href="{% url 'usuarios:detalle_pedido' pedido.id %}" 
+                                   class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i> Ver
+                                </a>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <div class="alert alert-info mt-4">
+        <h5><i class="fas fa-info-circle me-2"></i>Información importante</h5>
+        <p class="mb-0">
+            • Los pedidos en estado "Pendiente" están siendo procesados.<br>
+            • Los pedidos "Enviados" ya están en camino a tu dirección.<br>
+            • Si tienes alguna duda, contacta a nuestro soporte.
+        </p>
+    </div>
+    
+    {% else %}
+    <div class="text-center py-5">
+        <i class="fas fa-box-open fa-4x text-muted mb-4"></i>
+        <h3>No tienes pedidos aún</h3>
+        <p class="lead text-muted mb-4">¡Aprovecha nuestras ofertas y realiza tu primera compra!</p>
+        <div class="d-flex justify-content-center gap-3">
+            <a href="{% url 'tienda:productos' %}" class="btn btn-primary btn-lg">
+                <i class="fas fa-store me-2"></i>Ir a la Tienda
+            </a>
+            <a href="{% url 'inicio' %}" class="btn btn-outline-primary btn-lg">
+                <i class="fas fa-home me-2"></i>Ver Ofertas
+            </a>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
+

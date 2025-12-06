@@ -1,0 +1,211 @@
+﻿{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Categorías - Fútbol Store{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <!-- Encabezado -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="section-title"> 
+                <i class="fas fa-tags me-2 text-primary"></i>
+                Nuestras Categorías
+            </h1>
+            <p class="lead text-muted">Explora productos organizados por categoría</p>
+        </div>
+    </div>
+
+    <!-- Categorías -->
+    {% if categorias %}
+    <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+        {% for categoria in categorias %}
+        <div class="col">
+            <div class="card h-100 shadow-lg border-0 product-card">
+                <!-- Imagen de la categoría -->
+                <div class="position-relative overflow-hidden" style="height: 200px;">
+                    {% if categoria.imagen %}
+                    <img src="{{ categoria.imagen.url }}" 
+                         class="card-img-top product-img w-100 h-100" 
+                         alt="{{ categoria.nombre }}"
+                         style="object-fit: cover;">
+                    {% else %}
+                    <!-- Imagen por defecto con icono -->
+                    <div class="card-img-top product-img w-100 h-100 d-flex align-items-center justify-content-center" 
+                         style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                        <i class="fas fa-futbol fa-4x text-white opacity-75"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Badge con contador de productos (opcional) -->
+                    <div class="position-absolute top-0 end-0 m-3">
+                        <span class="badge bg-primary rounded-pill px-3 py-2">
+                            <i class="fas fa-box me-1"></i>
+                            {% if categoria.producto_set.count > 0 %}
+                            {{ categoria.producto_set.count }}
+                            {% else %}
+                            0
+                            {% endif %}
+                        </span>
+                    </div>
+                </div>
+                
+                <!-- Contenido de la tarjeta -->
+                <div class="card-body d-flex flex-column">
+                    <h5 class="card-title fw-bold mb-2 text-dark">
+                        <i class="fas fa-{{ categoria.icono|default:'tag' }} me-2 text-primary"></i>
+                        {{ categoria.nombre }}
+                    </h5>
+                    
+                    {% if categoria.descripcion %}
+                    <p class="card-text text-muted flex-grow-1 mb-3">
+                        {{ categoria.descripcion|truncatechars:100 }}
+                    </p>
+                    {% else %}
+                    <p class="card-text text-muted flex-grow-1 mb-3">
+                        Productos de {{ categoria.nombre }} para todos los gustos.
+                    </p>
+                    {% endif %}
+                    
+                    <!-- Botón de acción -->
+                    <div class="mt-auto">
+                        <a href="{% url 'tienda:productos_por_categoria' categoria.id %}" 
+                           class="btn btn-primary w-100 btn-lg">
+                            <i class="fas fa-eye me-2"></i>
+                            Explorar Categoría
+                        </a>
+                    </div>
+                </div>
+                
+                <!-- Footer de la tarjeta (opcional) -->
+                <div class="card-footer bg-transparent border-top-0 text-center">
+                    <small class="text-muted">
+                        <i class="fas fa-star text-warning me-1"></i>
+                        Productos de calidad garantizada
+                    </small>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- Mensaje si no hay categorías -->
+    <div class="alert alert-info text-center py-5 my-5 rounded-3 shadow-sm">
+        <div class="py-4">
+            <i class="fas fa-tags fa-4x text-info mb-3 opacity-75"></i>
+            <h4 class="fw-bold mb-3">No hay categorías disponibles aún</h4>
+            <p class="mb-4">Estamos preparando nuestras categorías especializadas.</p>
+            <a href="{% url 'tienda:productos' %}" class="btn btn-primary btn-lg">
+                <i class="fas fa-store me-2"></i>
+                Ver todos los productos
+            </a>
+        </div>
+    </div>
+    {% endif %}
+    
+    <!-- Sección adicional -->
+    <div class="row mt-5 pt-4">
+        <div class="col-12">
+            <div class="card bg-gradient-primary text-white shadow-lg border-0">
+                <div class="card-body p-4">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h3 class="fw-bold mb-2">
+                                <i class="fas fa-search me-2"></i>
+                                ¿No encuentras lo que buscas?
+                            </h3>
+                            <p class="mb-0 opacity-90">
+                                Usa nuestro buscador para encontrar productos específicos
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                            <a href="{% url 'tienda:buscar' %}" class="btn btn-light btn-lg">
+                                <i class="fas fa-search me-2"></i>
+                                Buscar Productos
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Estilos adicionales para esta página -->
+<style>
+    .categoria-card {
+        transition: all 0.3s ease;
+        border-radius: 15px;
+        overflow: hidden;
+        border: 2px solid transparent;
+    }
+    
+    .categoria-card:hover {
+        transform: translateY(-10px);
+        border-color: var(--primary-color);
+        box-shadow: 0 15px 30px rgba(13, 110, 253, 0.2);
+    }
+    
+    .categoria-img {
+        height: 200px;
+        object-fit: cover;
+        transition: transform 0.5s ease;
+    }
+    
+    .categoria-card:hover .categoria-img {
+        transform: scale(1.1);
+    }
+    
+    .categoria-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: rgba(13, 110, 253, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 15px;
+        transition: all 0.3s;
+    }
+    
+    .categoria-card:hover .categoria-icon {
+        background: rgba(13, 110, 253, 0.2);
+        transform: scale(1.1);
+    }
+    
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #0d6efd 0%, #0dcaf0 100%) !important;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Efecto hover para las tarjetas
+        const cards = document.querySelectorAll('.product-card');
+        cards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px)';
+                this.style.boxShadow = '0 15px 30px rgba(0,0,0,0.15)';
+            });
+            
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '';
+            });
+        });
+        
+        // Contador de productos (simulado si no existe)
+        const productCounts = document.querySelectorAll('.badge.bg-primary');
+        productCounts.forEach(badge => {
+            const count = parseInt(badge.textContent.trim());
+            if (isNaN(count) || count === 0) {
+                badge.innerHTML = '<i class="fas fa-plus me-1"></i>Próximamente';
+                badge.classList.remove('bg-primary');
+                badge.classList.add('bg-secondary');
+            }
+        });
+    });
+</script>
+{% endblock %}

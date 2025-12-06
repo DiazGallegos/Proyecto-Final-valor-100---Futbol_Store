@@ -1,0 +1,129 @@
+﻿<!-- templates/tienda/productos.html -->
+{% extends "base.html" %}
+
+{% block title %}Productos - Fútbol Store{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Cabecera -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <h1 class="display-5 fw-bold">🏪 Todos los Productos</h1>
+            <p class="lead">Explora nuestra colección completa</p>
+        </div>
+    </div>
+
+    <!-- Filtros -->
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <div class="btn-group" role="group">
+                <a href="?orden=-fecha_creacion" class="btn btn-outline-secondary">Más recientes</a>
+                <a href="?orden=precio" class="btn btn-outline-secondary">Menor precio</a>
+                <a href="?orden=-precio" class="btn btn-outline-secondary">Mayor precio</a>
+            </div>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{% url 'tienda:categorias' %}" class="btn btn-outline-primary">
+                <i class="fas fa-filter me-2"></i>Filtrar por categoría
+            </a>
+        </div>
+    </div>
+
+    <!-- Grid de productos -->
+    {% if productos %}
+    <div class="row row-cols-1 row-cols-md-4 g-4">
+        {% for producto in productos %}
+        <div class="col">
+            <!-- Incluir tarjeta de producto -->
+            {% include "tienda/partials/producto_card.html" %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <!-- Sin productos -->
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="fas fa-box-open fa-5x text-muted"></i>
+        </div>
+        <h3 class="fw-bold mb-3">No hay productos disponibles</h3>
+        <p class="text-muted mb-4">Pronto añadiremos nuevos productos a nuestra tienda.</p>
+    </div>
+    {% endif %}
+</div>
+
+<!-- Script para manejar el carrito -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Manejar formularios de agregar al carrito
+    document.querySelectorAll('form[action*="agregar"]').forEach(form => {
+        form.addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            
+            fetch(this.action, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Actualizar contador del carrito
+                    const badge = document.querySelector('.badge.bg-danger');
+                    if (badge) {
+                        badge.textContent = data.carrito_count || data.count;
+                        badge.style.display = 'block';
+                    }
+                    
+                    // Mostrar notificación
+                    showNotification(data.message || 'Producto agregado al carrito', 'success');
+                } else {
+                    showNotification(data.message || 'Error', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Error al agregar al carrito', 'error');
+            });
+        });
+    });
+});
+
+function showNotification(message, type) {
+    // Crear notificación
+    const notification = document.createElement('div');
+    notification.className = `position-fixed top-0 end-0 m-3 alert alert-${type} alert-dismissible fade show`;
+    notification.style.zIndex = '9999';
+    notification.innerHTML = `
+        <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle me-2"></i>
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-eliminar después de 3 segundos
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>
+{% endblock %}

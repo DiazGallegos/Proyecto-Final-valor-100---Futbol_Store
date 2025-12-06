@@ -1,0 +1,97 @@
+﻿{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Pedido #{{ pedido.id }}</h2>
+        <span class="badge bg-{{ pedido.estado_color }} fs-6">{{ pedido.estado }}</span>
+    </div>
+    
+    <div class="row">
+        <!-- InformaciÃ³n del Pedido -->
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Productos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Cantidad</th>
+                                    <th>Precio Unitario</th>
+                                    <th>Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in items %}
+                                <tr>
+                                    <td>{{ item.nombre_producto }}</td>
+                                    <td>{{ item.cantidad }}</td>
+                                    <td>${{ item.precio_formateado }}</td>
+                                    <td>${{ item.subtotal_formateado }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr class="table-primary">
+                                    <th colspan="3" class="text-end">Total:</th>
+                                    <th class="fs-5">${{ pedido.total|floatformat:0 }}</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- InformaciÃ³n de EnvÃ­o y Pago -->
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0">InformaciÃ³n de EnvÃ­o</h5>
+                </div>
+                <div class="card-body">
+                    <p><strong>DirecciÃ³n:</strong><br>{{ pedido.direccion_envio }}</p>
+                    <p><strong>Ciudad:</strong> {{ pedido.ciudad }}</p>
+                    <p><strong>CÃ³digo Postal:</strong> {{ pedido.codigo_postal }}</p>
+                    <p><strong>TelÃ©fono:</strong> {{ pedido.telefono }}</p>
+                    {% if pedido.notas %}
+                    <p><strong>Notas:</strong> {{ pedido.notas }}</p>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">InformaciÃ³n de Pago</h5>
+                </div>
+                <div class="card-body">
+                    <p><i class="{{ pedido.metodo_pago_icono }} me-2"></i> 
+                       <strong>{{ pedido.metodo_pago }}</strong></p>
+                    {% if pedido.metodo_pago == 'TARJETA' %}
+                    <p><strong>Tarjeta:</strong> **** **** **** {{ pedido.ultimos_digitos_tarjeta }}</p>
+                    <p><strong>Titular:</strong> {{ pedido.nombre_titular|default:"No especificado" }}</p>
+                    {% endif %}
+                    <p><strong>Fecha del pedido:</strong> {{ pedido.fecha_formateada }}</p>
+                    <p><strong>Estado de pago:</strong> 
+                        {% if pedido.pagado %}
+                        <span class="badge bg-success">Pagado</span>
+                        {% else %}
+                        <span class="badge bg-warning">Pendiente</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            
+            <div class="mt-3">
+                <a href="{% url 'usuarios:mis_pedidos' %}" class="btn btn-outline-secondary w-100">
+                    <i class="fas fa-arrow-left me-2"></i>Volver a mis pedidos
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

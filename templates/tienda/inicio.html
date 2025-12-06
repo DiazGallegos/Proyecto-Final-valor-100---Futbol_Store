@@ -1,0 +1,48 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Inicio - Fútbol Store{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="jumbotron bg-primary text-white p-5 rounded-3 shadow-lg mt-4">
+        <h1 class="display-4 fw-bold">⚽ ¡Bienvenido a Fútbol Store!</h1>
+        <p class="lead">La mejor tienda de artículos deportivos, equipaciones y accesorios de fútbol.</p>
+        <a href="{% url 'tienda:productos' %}" class="btn btn-light btn-lg mt-3">
+            <i class="fas fa-shopping-bag me-2"></i>Ver Tienda
+        </a>
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-4 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-fire fa-3x text-danger mb-3"></i>
+                    <h5 class="card-title">OFERTAS ESPECIALES</h5>
+                    <a href="{% url 'tienda:ofertas' %}" class="btn btn-danger mt-2">Ver Ofertas</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-star fa-3x text-warning mb-3"></i>
+                    <h5 class="card-title">NOVEDADES</h5>
+                    <a href="{% url 'tienda:novedades' %}" class="btn btn-warning mt-2">Ver Novedades</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4 mb-4">
+            <div class="card text-center">
+                <div class="card-body">
+                    <i class="fas fa-tags fa-3x text-success mb-3"></i>
+                    <h5 class="card-title">CATEGORÍAS</h5>
+                    <a href="{% url 'tienda:categorias' %}" class="btn btn-success mt-2">Ver Categorías</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

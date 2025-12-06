@@ -1,0 +1,490 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ producto.nombre }} - Fútbol Store{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Ruta de navegación -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="/">Inicio</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'tienda:productos' %}">Tienda</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'tienda:productos_por_categoria' producto.categoria.id %}">{{ producto.categoria.nombre }}</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ producto.nombre }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Imágenes del producto -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm mb-4">
+                <div class="card-body p-0">
+                    {% if producto.imagen %}
+                    <img src="{{ producto.imagen.url }}" 
+                         class="img-fluid rounded" 
+                         alt="{{ producto.nombre }}"
+                         id="mainProductImage"
+                         style="max-height: 500px; width: 100%; object-fit: contain;">
+                    {% else %}
+                    <div class="d-flex align-items-center justify-content-center bg-light rounded" style="height: 400px;">
+                        <i class="fas fa-image fa-5x text-muted"></i>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Badges -->
+                <div class="card-footer bg-transparent border-top-0">
+                    <div class="d-flex flex-wrap gap-2">
+                        {% if producto.en_oferta %}
+                        <span class="badge bg-danger fs-6 p-2">
+                            <i class="fas fa-fire me-1"></i>OFERTA -{{ producto.porcentaje_descuento }}%
+                        </span>
+                        {% endif %}
+                        
+                        {% if producto.nuevo %}
+                        <span class="badge bg-success fs-6 p-2">
+                            <i class="fas fa-star me-1"></i>NUEVO
+                        </span>
+                        {% endif %}
+                        
+                        {% if producto.destacado %}
+                        <span class="badge bg-warning text-dark fs-6 p-2">
+                            <i class="fas fa-crown me-1"></i>DESTACADO
+                        </span>
+                        {% endif %}
+                        
+                        <span class="badge bg-info fs-6 p-2">
+                            <i class="fas fa-tag me-1"></i>{{ producto.categoria.nombre }}
+                        </span>
+                        
+                        <span class="badge bg-secondary fs-6 p-2">
+                            <i class="fas fa-trademark me-1"></i>{{ producto.get_marca_display }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información del producto -->
+        <div class="col-lg-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h1 class="fw-bold mb-3">{{ producto.nombre }}</h1>
+                    
+                    <!-- Precio -->
+                    <div class="mb-4">
+                        {% if producto.en_oferta %}
+                        <div class="d-flex align-items-center">
+                            <span class="text-decoration-line-through text-muted fs-4 me-3">
+                                ${{ producto.precio_original|floatformat:0 }}
+                            </span>
+                            <span class="display-5 fw-bold text-danger">
+                                ${{ producto.precio|floatformat:0 }}
+                            </span>
+                        </div>
+                        <div class="mt-2">
+                            <span class="badge bg-success fs-6">
+                                <i class="fas fa-piggy-bank me-2"></i>
+                                Ahorras ${{ producto.precio_original|floatformat:0|add:"-"|add:producto.precio|floatformat:0 }}
+                            </span>
+                        </div>
+                        {% else %}
+                        <span class="display-4 fw-bold text-primary">
+                            ${{ producto.precio|floatformat:0 }}
+                        </span>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Stock -->
+                    <div class="mb-4">
+                        {% if producto.stock > 10 %}
+                        <span class="badge bg-success fs-6 p-3">
+                            <i class="fas fa-check-circle me-2"></i>
+                            Disponible ({{ producto.stock }} unidades)
+                        </span>
+                        {% elif producto.stock > 0 %}
+                        <span class="badge bg-warning text-dark fs-6 p-3">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            Últimas {{ producto.stock }} unidades
+                        </span>
+                        {% else %}
+                        <span class="badge bg-danger fs-6 p-3">
+                            <i class="fas fa-times-circle me-2"></i>
+                            AGOTADO
+                        </span>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- Descripción -->
+                    <div class="mb-4">
+                        <h4 class="fw-bold mb-3">Descripción</h4>
+                        <p class="text-muted fs-5">{{ producto.descripcion|linebreaks }}</p>
+                    </div>
+                    
+                    <!-- Especificaciones -->
+                    <div class="mb-4">
+                        <h4 class="fw-bold mb-3">Especificaciones</h4>
+                        <ul class="list-unstyled">
+                            <li class="mb-2">
+                                <strong><i class="fas fa-layer-group me-2"></i>Categoría:</strong>
+                                <span class="ms-2">{{ producto.categoria.nombre }}</span>
+                            </li>
+                            <li class="mb-2">
+                                <strong><i class="fas fa-trademark me-2"></i>Marca:</strong>
+                                <span class="ms-2">{{ producto.get_marca_display }}</span>
+                            </li>
+                            <li class="mb-2">
+                                <strong><i class="fas fa-ruler me-2"></i>Talla:</strong>
+                                <span class="ms-2">{{ producto.get_talla_display }}</span>
+                            </li>
+                            <li class="mb-2">
+                                <strong><i class="fas fa-box me-2"></i>Stock:</strong>
+                                <span class="ms-2">{{ producto.stock }} unidades</span>
+                            </li>
+                        </ul>
+                    </div>
+                    
+                    <!-- Formulario para agregar al carrito -->
+                    {% if producto.stock > 0 %}
+                    <div class="mt-4">
+                        <form id="addToCartForm" method="POST" action="{% url 'carrito:agregar_al_carrito' producto.id %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="cantidad" id="cantidadHidden" value="1">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label for="cantidad" class="form-label fw-bold">Cantidad:</label>
+                                    <div class="input-group">
+                                        <button type="button" class="btn btn-outline-secondary" onclick="decreaseQuantity()">-</button>
+                                        <input type="number" 
+                                               id="cantidad" 
+                                               name="cantidad_input" 
+                                               value="1" 
+                                               min="1" 
+                                               max="{{ producto.stock }}"
+                                               class="form-control text-center">
+                                        <button type="button" class="btn btn-outline-secondary" onclick="increaseQuantity()">+</button>
+                                    </div>
+                                </div>
+                                <div class="col-md-8">
+                                    <button type="button" id="addToCartBtn" class="btn btn-primary btn-lg w-100 mt-md-4">
+                                        <i class="fas fa-cart-plus me-2"></i>
+                                        <span id="btnText">AGREGAR AL CARRITO</span>
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning mt-4">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        Este producto está actualmente agotado. Vuelve a revisar más tarde.
+                    </div>
+                    {% endif %}
+                    
+                    <!-- Botones adicionales -->
+                    <div class="row mt-4 g-2">
+                        <div class="col-md-6">
+                            <a href="{% url 'tienda:productos_por_categoria' producto.categoria.id %}" 
+                               class="btn btn-outline-primary w-100">
+                                <i class="fas fa-tags me-2"></i>
+                                Ver más {{ producto.categoria.nombre }}
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'tienda:productos' %}" class="btn btn-outline-secondary w-100">
+                                <i class="fas fa-store me-2"></i>
+                                Continuar comprando
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Productos relacionados -->
+    {% if productos_relacionados %}
+    <div class="row mt-5 pt-5">
+        <div class="col-12">
+            <h2 class="fw-bold mb-4">Productos relacionados</h2>
+            <div class="row g-4">
+                {% for producto_rel in productos_relacionados %}
+                <div class="col-lg-3 col-md-4 col-sm-6">
+                    <div class="card h-100 shadow-sm border-0 product-card">
+                        <div class="position-relative overflow-hidden" style="height: 200px;">
+                            {% if producto_rel.imagen %}
+                            <img src="{{ producto_rel.imagen.url }}" 
+                                 class="w-100 h-100 object-fit-cover"
+                                 alt="{{ producto_rel.nombre }}">
+                            {% else %}
+                            <div class="w-100 h-100 d-flex align-items-center justify-content-center bg-light">
+                                <i class="fas fa-image fa-3x text-muted"></i>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <a href="{% url 'tienda:detalle_producto' producto_rel.id %}" 
+                                   class="text-decoration-none text-dark">
+                                    {{ producto_rel.nombre|truncatechars:40 }}
+                                </a>
+                            </h5>
+                            <p class="card-text text-primary fw-bold">
+                                ${{ producto_rel.precio|floatformat:0 }}
+                            </p>
+                            <a href="{% url 'tienda:detalle_producto' producto_rel.id %}" 
+                               class="btn btn-sm btn-primary w-100">
+                                <i class="fas fa-eye me-1"></i>
+                                Ver producto
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<!-- NUEVO JAVASCRIPT CORREGIDO -->
+<script>
+// Control de cantidad
+function increaseQuantity() {
+    const input = document.getElementById('cantidad');
+    const hidden = document.getElementById('cantidadHidden');
+    const max = parseInt(input.max);
+    let value = parseInt(input.value) || 1;
+    
+    if (value < max) {
+        input.value = value + 1;
+        hidden.value = value + 1;
+    }
+}
+
+function decreaseQuantity() {
+    const input = document.getElementById('cantidad');
+    const hidden = document.getElementById('cantidadHidden');
+    let value = parseInt(input.value) || 1;
+    
+    if (value > 1) {
+        input.value = value - 1;
+        hidden.value = value - 1;
+    }
+}
+
+// Actualizar campo oculto cuando cambia el input
+document.getElementById('cantidad').addEventListener('change', function() {
+    const hidden = document.getElementById('cantidadHidden');
+    hidden.value = this.value;
+});
+
+// Función para agregar al carrito con AJAX
+function addToCartFromDetail() {
+    const button = document.getElementById('addToCartBtn');
+    const btnText = document.getElementById('btnText');
+    const buttonIcon = button.querySelector('i');
+    const originalText = btnText.textContent;
+    const originalIconClass = buttonIcon.className;
+    
+    // 1. CAMBIAR A "AGREGANDO..."
+    button.disabled = true;
+    btnText.textContent = 'AGREGANDO...';
+    buttonIcon.className = 'fas fa-spinner fa-spin me-2';
+    
+    // Obtener cantidad
+    const cantidad = document.getElementById('cantidadHidden').value || 1;
+    
+    // Obtener token CSRF
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                     document.cookie.match(/csrftoken=([^;]+)/)?.[1] || 
+                     '{{ csrf_token }}';
+    
+    // Crear form data
+    const formData = new FormData();
+    formData.append('csrfmiddlewaretoken', csrfToken);
+    formData.append('cantidad', cantidad);
+    
+    // 2. ENVIAR PETICIÓN AJAX
+    fetch(`/carrito/agregar/{{ producto.id }}/`, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error del servidor: ' + response.status);
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // 3. CAMBIAR A "¡AGREGADO!"
+            btnText.textContent = '¡AGREGADO!';
+            buttonIcon.className = 'fas fa-check me-2';
+            button.style.backgroundColor = '#198754';
+            button.style.borderColor = '#198754';
+            
+            // Mostrar notificación de éxito
+            showNotification(data.message, 'success');
+            
+            // Actualizar contador del carrito
+            updateCartCount(data.carrito_count || 0);
+            
+            // 4. VOLVER AL ESTADO ORIGINAL DESPUÉS DE 2 SEGUNDOS
+            setTimeout(() => {
+                button.disabled = false;
+                btnText.textContent = originalText;
+                buttonIcon.className = originalIconClass;
+                button.style.backgroundColor = '';
+                button.style.borderColor = '';
+            }, 2000);
+            
+        } else {
+            // Mostrar error
+            showNotification(data.message || 'Error al agregar al carrito', 'danger');
+            
+            // Restaurar botón
+            button.disabled = false;
+            btnText.textContent = originalText;
+            buttonIcon.className = originalIconClass;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        
+        // Mostrar error de conexión
+        showNotification('Error de conexión. Intenta de nuevo.', 'danger');
+        
+        // Restaurar botón
+        button.disabled = false;
+        btnText.textContent = originalText;
+        buttonIcon.className = originalIconClass;
+    });
+}
+
+// Función para mostrar notificaciones
+function showNotification(message, type = 'success') {
+    // Remover notificaciones anteriores
+    const oldNotifications = document.querySelectorAll('.cart-notification');
+    oldNotifications.forEach(notif => notif.remove());
+    
+    // Crear nueva notificación
+    const notification = document.createElement('div');
+    notification.className = `cart-notification position-fixed top-0 end-0 m-3 p-3 rounded shadow-lg`;
+    notification.style.zIndex = '9999';
+    notification.style.minWidth = '300px';
+    notification.style.maxWidth = '400px';
+    notification.style.animation = 'slideIn 0.3s ease-out';
+    
+    // Colores según tipo
+    if (type === 'success') {
+        notification.style.backgroundColor = '#d1e7dd';
+        notification.style.color = '#0f5132';
+        notification.style.border = '1px solid #badbcc';
+    } else {
+        notification.style.backgroundColor = '#f8d7da';
+        notification.style.color = '#842029';
+        notification.style.border = '1px solid #f5c2c7';
+    }
+    
+    // Icono según tipo
+    const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+    
+    notification.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="fas ${icon} me-3 fa-lg"></i>
+            <div class="flex-grow-1">
+                <strong>${type === 'success' ? 'Éxito' : 'Error'}</strong>
+                <div class="small">${message}</div>
+            </div>
+            <button type="button" class="btn-close ${type === 'success' ? 'btn-close-dark' : ''}" 
+                    onclick="this.parentElement.parentElement.remove()"></button>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Remover después de 4 segundos
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(() => notification.remove(), 300);
+        }
+    }, 4000);
+}
+
+// Función para actualizar contador del carrito
+function updateCartCount(count) {
+    // Buscar badge existente en el navbar
+    let badge = document.querySelector('.cart-badge');
+    
+    if (!badge) {
+        // Crear nuevo badge si no existe
+        const cartLink = document.querySelector('a[href*="carrito"], .nav-link[href*="carrito"]');
+        if (cartLink) {
+            badge = document.createElement('span');
+            badge.className = 'cart-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger';
+            badge.style.fontSize = '0.7rem';
+            badge.style.padding = '0.25em 0.6em';
+            badge.textContent = count;
+            cartLink.style.position = 'relative';
+            cartLink.appendChild(badge);
+            return;
+        }
+    }
+    
+    // Actualizar badge existente
+    if (badge) {
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'inline-block' : 'none';
+        
+        // Animación de pulso
+        badge.style.transform = 'scale(1.3)';
+        setTimeout(() => {
+            badge.style.transform = 'scale(1)';
+        }, 300);
+    }
+}
+
+// Agregar evento al botón
+document.getElementById('addToCartBtn').addEventListener('click', addToCartFromDetail);
+
+// Agregar estilos CSS para animaciones
+const style = document.createElement('style');
+style.textContent = `
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.cart-badge {
+    animation: pulse 0.3s ease-in-out;
+}
+
+/* Estilos para el input de cantidad */
+.input-group button {
+    width: 40px;
+}
+
+.input-group input {
+    text-align: center;
+}
+`;
+document.head.appendChild(style);
+</script>
+{% endblock %}

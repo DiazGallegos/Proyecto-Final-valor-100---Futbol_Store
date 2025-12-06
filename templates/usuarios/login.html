@@ -1,0 +1,169 @@
+﻿{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Iniciar Sesión{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg border-0">
+                <div class="card-header bg-primary text-white text-center py-3">
+                    <h3 class="mb-0">
+                        <i class="fas fa-sign-in-alt me-2"></i>
+                        Iniciar Sesión
+                    </h3>
+                </div>
+                
+                <div class="card-body p-4">
+                    {% if messages %}
+                    <div class="mb-3">
+                        {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                    
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        
+                        {% if error_message %}
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            {{ error_message }}
+                        </div>
+                        {% endif %}
+                        
+                        <div class="mb-3">
+                            <label for="username" class="form-label fw-bold">
+                                <i class="fas fa-user me-1"></i> Usuario
+                            </label>
+                            <input type="text" 
+                                   name="username" 
+                                   id="username"
+                                   class="form-control form-control-lg {% if form.username.errors %}is-invalid{% endif %}"
+                                   placeholder="Ingresa tu nombre de usuario"
+                                   required
+                                   autofocus>
+                            {% if form.username.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.username.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="password" class="form-label fw-bold">
+                                <i class="fas fa-lock me-1"></i> Contraseña
+                            </label>
+                            <input type="password" 
+                                   name="password" 
+                                   id="password"
+                                   class="form-control form-control-lg {% if form.password.errors %}is-invalid{% endif %}"
+                                   placeholder="Ingresa tu contraseña"
+                                   required>
+                            {% if form.password.errors %}
+                            <div class="invalid-feedback">
+                                {{ form.password.errors.0 }}
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sign-in-alt me-2"></i>
+                                Iniciar Sesión
+                            </button>
+                        </div>
+                        
+                        <div class="text-center mb-3">
+                            <a href="#" class="text-decoration-none">
+                                <i class="fas fa-key me-1"></i>
+                                ¿Olvidaste tu contraseña?
+                            </a>
+                        </div>
+                        
+                        <hr class="my-4">
+                        
+                        <div class="text-center">
+                            <p class="mb-2">¿No tienes una cuenta?</p>
+                            <a href="{% url 'usuarios:registro' %}" class="btn btn-outline-primary btn-lg">
+                                <i class="fas fa-user-plus me-2"></i>
+                                Crear Cuenta
+                            </a>
+                        </div>
+                    </form>
+                </div>
+                
+                <div class="card-footer text-center py-3 bg-light">
+                    <small class="text-muted">
+                        <i class="fas fa-info-circle me-1"></i>
+                        Usa las credenciales de administrador para acceder al panel
+                    </small>
+                </div>
+            </div>
+            
+            <!-- CREDENCIALES DE PRUEBA (solo en desarrollo) -->
+            {% if debug %}
+            <div class="mt-4 p-3 bg-light rounded">
+                <h5 class="mb-3">
+                    <i class="fas fa-vial me-2"></i>
+                    Credenciales de prueba
+                </h5>
+                <div class="row">
+                    <div class="col-md-6 mb-2">
+                        <strong>Admin:</strong> admin / admin1234
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Usuario:</strong> testuser / test1234
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const username = document.getElementById('username');
+    const password = document.getElementById('password');
+    
+    // Auto-rellenar para pruebas
+    if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost') {
+        username.value = 'admin';
+        password.value = 'admin1234';
+    }
+    
+    // Validación en tiempo real
+    form.addEventListener('submit', function(e) {
+        let valid = true;
+        
+        if (!username.value.trim()) {
+            valid = false;
+            username.classList.add('is-invalid');
+        } else {
+            username.classList.remove('is-invalid');
+        }
+        
+        if (!password.value.trim()) {
+            valid = false;
+            password.classList.add('is-invalid');
+        } else {
+            password.classList.remove('is-invalid');
+        }
+        
+        if (!valid) {
+            e.preventDefault();
+            alert('Por favor completa todos los campos');
+        }
+    });
+});
+</script>
+{% endblock %}

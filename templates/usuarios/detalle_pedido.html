@@ -1,0 +1,166 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Pedido #{{ pedido.id }} - Futbol Store{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'inicio' %}">Inicio</a></li>
+            <li class="breadcrumb-item"><a href="{% url 'usuarios:pedidos' %}">Mis Pedidos</a></li>
+            <li class="breadcrumb-item active">Pedido #{{ pedido.id }}</li>
+        </ol>
+    </nav>
+    
+    <div class="row">
+        <!-- Información del pedido -->
+        <div class="col-lg-8">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0"><i class="fas fa-receipt me-2"></i>Pedido #{{ pedido.id }}</h5>
+                        <span class="badge bg-light text-dark">
+                            {{ pedido.fecha_pedido|date:"d/m/Y H:i" }}
+                        </span>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <!-- Productos -->
+                    <h6 class="mb-3">Productos del pedido:</h6>
+                    <div class="table-responsive">
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th class="text-center">Cantidad</th>
+                                    <th class="text-end">Precio</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in items %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if item.producto.imagen %}
+                                            <img src="{{ item.producto.imagen.url }}" 
+                                                 class="img-thumbnail me-3" 
+                                                 style="width: 60px; height: 60px; object-fit: cover;">
+                                            {% endif %}
+                                            <div>
+                                                <strong>{{ item.producto.nombre }}</strong><br>
+                                                <small class="text-muted">{{ item.producto.marca }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="text-center">{{ item.cantidad }}</td>
+                                    <td class="text-end">${{ item.precio }}</td>
+                                    <td class="text-end fw-bold">${{ item.subtotal }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <td colspan="3" class="text-end"><strong>Total:</strong></td>
+                                    <td class="text-end fw-bold h5 text-primary">${{ pedido.total }}</td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Información de envío -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-truck me-2"></i>Información de Envío</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Dirección:</strong><br>{{ pedido.direccion_envio }}</p>
+                            <p><strong>Ciudad:</strong> {{ pedido.ciudad }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Código Postal:</strong> {{ pedido.codigo_postal }}</p>
+                            <p><strong>Teléfono:</strong> {{ pedido.telefono }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Resumen y estado -->
+        <div class="col-lg-4">
+            <div class="card sticky-top" style="top: 100px;">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Resumen del Pedido</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h6>Estado del pedido:</h6>
+                        {% if pedido.estado == "PENDIENTE" %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-clock me-2"></i>
+                            <strong>Pendiente</strong><br>
+                            <small>Tu pedido está siendo procesado.</small>
+                        </div>
+                        {% elif pedido.estado == "PROCESANDO" %}
+                        <div class="alert alert-info">
+                            <i class="fas fa-cogs me-2"></i>
+                            <strong>Procesando</strong><br>
+                            <small>Estamos preparando tu pedido.</small>
+                        </div>
+                        {% elif pedido.estado == "ENVIADO" %}
+                        <div class="alert alert-primary">
+                            <i class="fas fa-shipping-fast me-2"></i>
+                            <strong>Enviado</strong><br>
+                            <small>Tu pedido está en camino.</small>
+                        </div>
+                        {% elif pedido.estado == "ENTREGADO" %}
+                        <div class="alert alert-success">
+                            <i class="fas fa-check-circle me-2"></i>
+                            <strong>Entregado</strong><br>
+                            <small>Tu pedido ha sido entregado.</small>
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6>Información de pago:</h6>
+                        <p><strong>Método:</strong> {{ pedido.get_metodo_pago_display }}</p>
+                        <p><strong>Pagado:</strong> 
+                            {% if pedido.pagado %}
+                            <span class="badge bg-success">Sí</span>
+                            {% else %}
+                            <span class="badge bg-danger">No</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6>Notas:</h6>
+                        <p class="text-muted">
+                            {% if pedido.notas %}
+                            {{ pedido.notas }}
+                            {% else %}
+                            <em>No hay notas adicionales.</em>
+                            {% endif %}
+                        </p>
+                    </div>
+                    
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'usuarios:pedidos' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left me-2"></i>Volver a mis pedidos
+                        </a>
+                        <button class="btn btn-outline-success" onclick="window.print()">
+                            <i class="fas fa-print me-2"></i>Imprimir comprobante
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

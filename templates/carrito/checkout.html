@@ -1,0 +1,201 @@
+﻿{% extends "base.html" %}
+
+{% block title %}Checkout - Futbol Store{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="page-title mb-4"><i class="fas fa-credit-card"></i> Finalizar Compra</h1>
+    
+    <div class="row">
+        <!-- Formulario -->
+        <div class="col-lg-8">
+            <!-- FORM CORREGIDO: usa carrito:procesar_pedido -->
+            <form method="post" action="{% url 'carrito:procesar_pedido' %}">
+                {% csrf_token %}
+                
+                <!-- Información personal -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-user"></i> Información Personal</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Nombre *</label>
+                                <input type="text" class="form-control" name="nombre" 
+                                       value="{{ user.first_name }} {{ user.last_name }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email *</label>
+                                <input type="email" class="form-control" name="email" 
+                                       value="{{ user.email }}" required>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Teléfono *</label>
+                            <input type="tel" class="form-control" name="telefono" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Dirección de envío -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-truck"></i> Dirección de Envío</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Dirección completa *</label>
+                            <textarea class="form-control" name="direccion" rows="3" required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Ciudad *</label>
+                                <input type="text" class="form-control" name="ciudad" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Código Postal *</label>
+                                <input type="text" class="form-control" name="codigo_postal" required>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Métodos de pago -->
+                <div class="card mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <h5 class="mb-0"><i class="fas fa-credit-card"></i> Método de Pago</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="payment-method">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="metodo_pago" 
+                                       id="tarjeta" value="TARJETA" checked>
+                                <label class="form-check-label fw-bold" for="tarjeta">
+                                    <i class="fas fa-credit-card me-2"></i>Tarjeta de crédito/débito
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="payment-method">
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="metodo_pago" 
+                                       id="efectivo" value="EFECTIVO">
+                                <label class="form-check-label fw-bold" for="efectivo">
+                                    <i class="fas fa-money-bill-wave me-2"></i>Efectivo al recibir
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Notas -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0"><i class="fas fa-sticky-note"></i> Notas adicionales</h5>
+                    </div>
+                    <div class="card-body">
+                        <textarea class="form-control" name="notas" rows="3" 
+                                  placeholder="Instrucciones especiales para la entrega..."></textarea>
+                    </div>
+                </div>
+                
+                <!-- Botones -->
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'carrito:ver_carrito' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Volver al carrito
+                    </a>
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="fas fa-lock me-2"></i>PAGAR ${{ carrito.total }}
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Resumen -->
+        <div class="col-lg-4">
+            <div class="card sticky-top" style="top: 100px;">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-shopping-bag"></i> Resumen del Pedido</h5>
+                </div>
+                <div class="card-body">
+                    <h6>Productos ({{ carrito.cantidad_total }})</h6>
+                    {% for item in carrito.items.all %}
+                    <div class="d-flex justify-content-between mb-2">
+                        <div>
+                            <small>{{ item.producto.nombre|truncatechars:25 }}</small>
+                            <br>
+                            <small class="text-muted">{{ item.cantidad }} x ${{ item.producto.precio }}</small>
+                        </div>
+                        <small>${{ item.subtotal }}</small>
+                    </div>
+                    {% endfor %}
+                    
+                    <hr>
+                    <div class="d-flex justify-content-between fw-bold fs-5 mt-3 pt-3 border-top">
+                        <span>Total:</span>
+                        <span>${{ carrito.total }}</span>
+                    </div>
+                    
+                    <hr>
+                    <div class="alert alert-success">
+                        <h6><i class="fas fa-shield-alt me-2"></i>Compra 100% Segura</h6>
+                        <small class="text-muted">
+                            Tus datos están protegidos con encriptación SSL 256-bit.
+                            No almacenamos información de tarjetas.
+                        </small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .page-title {
+        border-bottom: 3px solid #ff6b00;
+        padding-bottom: 10px;
+        margin-bottom: 30px;
+        color: #333;
+    }
+    .payment-method {
+        border: 2px solid #ddd;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 15px;
+        cursor: pointer;
+        transition: all 0.3s;
+    }
+    .payment-method:hover {
+        border-color: #ff6b00;
+        background: #fff9f0;
+    }
+    .sticky-top {
+        position: -webkit-sticky;
+        position: sticky;
+        z-index: 1020;
+    }
+</style>
+
+<script>
+    // Seleccionar método de pago
+    document.querySelectorAll('.payment-method').forEach(el => {
+        el.addEventListener('click', function() {
+            const radio = this.querySelector('input[type="radio"]');
+            if (radio) {
+                radio.checked = true;
+                document.querySelectorAll('.payment-method').forEach(el => {
+                    el.classList.remove('selected');
+                });
+                this.classList.add('selected');
+            }
+        });
+    });
+    
+    // Inicializar
+    document.addEventListener('DOMContentLoaded', function() {
+        document.querySelector('.payment-method').click();
+    });
+</script>
+{% endblock %}
+

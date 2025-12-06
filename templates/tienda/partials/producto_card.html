@@ -1,0 +1,274 @@
+﻿<div class="card product-card h-100 shadow-sm">
+    <!-- Imagen del producto -->
+    <div class="position-relative overflow-hidden">
+        <a href="{% url 'tienda:detalle_producto' producto.id %}">
+            {% if producto.imagen %}
+            <img src="{{ producto.imagen.url }}" 
+                 class="card-img-top product-img" 
+                 alt="{{ producto.nombre }}"
+                 style="height: 220px; object-fit: cover;">
+            {% else %}
+            <div class="card-img-top product-img d-flex align-items-center justify-content-center bg-light"
+                 style="height: 220px;">
+                <i class="fas fa-futbol fa-3x text-muted"></i>
+            </div>
+            {% endif %}
+        </a>
+        
+        <!-- Badges -->
+        <div class="position-absolute top-0 end-0 p-2">
+            {% if producto.es_oferta %}
+            <span class="badge badge-oferta">🔥 OFERTA</span>
+            {% elif producto.es_nuevo %}
+            <span class="badge badge-nuevo">✨ NUEVO</span>
+            {% elif producto.es_destacado %}
+            <span class="badge badge-destacado">⭐ DESTACADO</span>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Contenido de la tarjeta -->
+    <div class="card-body">
+        <!-- Categoría -->
+        <p class="card-text mb-1">
+            <small class="text-muted">
+                <i class="fas fa-tag me-1"></i>
+                {{ producto.categoria.nombre }}
+            </small>
+        </p>
+        
+        <!-- Nombre del producto -->
+        <h5 class="card-title fw-bold">{{ producto.nombre }}</h5>
+        
+        <!-- Descripción corta -->
+        <p class="card-text text-muted small">{{ producto.descripcion|truncatechars:80 }}</p>
+        
+        <!-- Precio -->
+        <div class="d-flex justify-content-between align-items-center mt-3">
+            <h4 class="text-primary fw-bold mb-0">${{ producto.precio }}</h4>
+            
+            <!-- Stock -->
+            {% if producto.stock > 0 %}
+            <small class="text-success">
+                <i class="fas fa-check-circle me-1"></i>Disponible
+            </small>
+            {% else %}
+            <small class="text-danger">
+                <i class="fas fa-times-circle me-1"></i>Agotado
+            </small>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Botón agregar al carrito - CON AJAX -->
+    <div class="card-footer bg-transparent border-top-0 pb-3">
+        {% if producto.stock > 0 %}
+        <button onclick="addToCart({{ producto.id }}, this)" 
+                class="btn btn-primary w-100 add-to-cart-btn" 
+                data-product-id="{{ producto.id }}"
+                data-product-name="{{ producto.nombre }}">
+            <i class="fas fa-cart-plus me-2"></i>
+            <span class="btn-text">Agregar al carrito</span>
+        </button>
+        {% else %}
+        <button class="btn btn-secondary w-100" disabled>
+            <i class="fas fa-times-circle me-2"></i>
+            Agotado
+        </button>
+        {% endif %}
+    </div>
+</div>
+
+<!-- JavaScript para manejar AJAX -->
+<script>
+// Función para agregar al carrito con AJAX
+function addToCart(productoId, button) {
+    // Guardar el estado original del botón
+    const btnText = button.querySelector('.btn-text');
+    const originalText = btnText.textContent;
+    const buttonIcon = button.querySelector('i');
+    const originalIconClass = buttonIcon.className;
+    
+    // 1. CAMBIAR A "AGREGANDO..."
+    button.disabled = true;
+    btnText.textContent = 'Agregando...';
+    buttonIcon.className = 'fas fa-spinner fa-spin me-2';
+    
+    // Obtener token CSRF
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]')?.value || 
+                     document.cookie.match(/csrftoken=([^;]+)/)?.[1] || 
+                     '{{ csrf_token }}';
+    
+    // Crear form data
+    const formData = new FormData();
+    formData.append('csrfmiddlewaretoken', csrfToken);
+    
+    // 2. ENVIAR PETICIÓN AJAX
+    fetch(`/carrito/agregar/${productoId}/`, {
+        method: 'POST',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest',
+        },
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Error del servidor');
+        }
+        return response.json();
+    })
+    .then(data => {
+        if (data.success) {
+            // 3. CAMBIAR A "¡AGREGADO!"
+            btnText.textContent = '¡Agregado!';
+            buttonIcon.className = 'fas fa-check me-2';
+            button.style.backgroundColor = '#198754';
+            button.style.borderColor = '#198754';
+            
+            // Mostrar notificación de éxito
+            showNotification(data.message, 'success');
+            
+            // Actualizar contador del carrito
+            updateCartCount(data.carrito_count || 0);
+            
+            // 4. VOLVER AL ESTADO ORIGINAL DESPUÉS DE 2 SEGUNDOS
+            setTimeout(() => {
+                button.disabled = false;
+                btnText.textContent = originalText;
+                buttonIcon.className = originalIconClass;
+                button.style.backgroundColor = '';
+                button.style.borderColor = '';
+            }, 2000);
+            
+        } else {
+            // Mostrar error
+            showNotification(data.message || 'Error al agregar al carrito', 'danger');
+            
+            // Restaurar botón
+            button.disabled = false;
+            btnText.textContent = originalText;
+            buttonIcon.className = originalIconClass;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        
+        // Mostrar error de conexión
+        showNotification('Error de conexión. Intenta de nuevo.', 'danger');
+        
+        // Restaurar botón
+        button.disabled = false;
+        btnText.textContent = originalText;
+        buttonIcon.className = originalIconClass;
+    });
+}
+
+// Función para mostrar notificaciones
+function showNotification(message, type = 'success') {
+    // Remover notificaciones anteriores
+    const oldNotifications = document.querySelectorAll('.cart-notification');
+    oldNotifications.forEach(notif => notif.remove());
+    
+    // Crear nueva notificación
+    const notification = document.createElement('div');
+    notification.className = `cart-notification position-fixed top-0 end-0 m-3 p-3 rounded shadow-lg`;
+    notification.style.zIndex = '9999';
+    notification.style.minWidth = '300px';
+    notification.style.maxWidth = '400px';
+    notification.style.animation = 'slideIn 0.3s ease-out';
+    
+    // Colores según tipo
+    if (type === 'success') {
+        notification.style.backgroundColor = '#d1e7dd';
+        notification.style.color = '#0f5132';
+        notification.style.border = '1px solid #badbcc';
+    } else {
+        notification.style.backgroundColor = '#f8d7da';
+        notification.style.color = '#842029';
+        notification.style.border = '1px solid #f5c2c7';
+    }
+    
+    // Icono según tipo
+    const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+    
+    notification.innerHTML = `
+        <div class="d-flex align-items-center">
+            <i class="fas ${icon} me-3 fa-lg"></i>
+            <div class="flex-grow-1">
+                <strong>${type === 'success' ? 'Éxito' : 'Error'}</strong>
+                <div class="small">${message}</div>
+            </div>
+            <button type="button" class="btn-close ${type === 'success' ? 'btn-close-dark' : ''}" 
+                    onclick="this.parentElement.parentElement.remove()"></button>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Remover después de 4 segundos
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.style.animation = 'slideOut 0.3s ease-out';
+            setTimeout(() => notification.remove(), 300);
+        }
+    }, 4000);
+}
+
+// Función para actualizar contador del carrito
+function updateCartCount(count) {
+    // Buscar badge existente en el navbar
+    let badge = document.querySelector('.cart-badge');
+    
+    if (!badge) {
+        // Crear nuevo badge si no existe
+        const cartLink = document.querySelector('a[href*="carrito"], .nav-link[href*="carrito"]');
+        if (cartLink) {
+            badge = document.createElement('span');
+            badge.className = 'cart-badge position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger';
+            badge.style.fontSize = '0.7rem';
+            badge.style.padding = '0.25em 0.6em';
+            badge.textContent = count;
+            cartLink.style.position = 'relative';
+            cartLink.appendChild(badge);
+            return;
+        }
+    }
+    
+    // Actualizar badge existente
+    if (badge) {
+        badge.textContent = count;
+        badge.style.display = count > 0 ? 'inline-block' : 'none';
+        
+        // Animación de pulso
+        badge.style.transform = 'scale(1.3)';
+        setTimeout(() => {
+            badge.style.transform = 'scale(1)';
+        }, 300);
+    }
+}
+
+// Agregar estilos CSS para animaciones
+const style = document.createElement('style');
+style.textContent = `
+@keyframes slideIn {
+    from { transform: translateX(100%); opacity: 0; }
+    to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideOut {
+    from { transform: translateX(0); opacity: 1; }
+    to { transform: translateX(100%); opacity: 0; }
+}
+
+@keyframes pulse {
+    0% { transform: scale(1); }
+    50% { transform: scale(1.2); }
+    100% { transform: scale(1); }
+}
+
+.cart-badge {
+    animation: pulse 0.3s ease-in-out;
+}
+`;
+document.head.appendChild(style);
+</script>
