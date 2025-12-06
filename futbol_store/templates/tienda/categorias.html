@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+
+{% block title %}Categorías - Futbol Store{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="page-title">Categorías</h1>
+    
+    <div class="row">
+        {% for categoria in categorias %}
+        <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+            <div class="card h-100 text-center">
+                <div class="card-body">
+                    {% if categoria.imagen %}
+                    <img src="{{ categoria.imagen.url }}" 
+                         class="img-fluid rounded-circle mb-3" 
+                         style="width: 150px; height: 150px; object-fit: cover;">
+                    {% else %}
+                    <div class="rounded-circle bg-secondary d-flex align-items-center justify-content-center mx-auto mb-3" 
+                         style="width: 150px; height: 150px;">
+                        <i class="fas fa-futbol fa-3x text-white"></i>
+                    </div>
+                    {% endif %}
+                    
+                    <h4>{{ categoria.nombre }}</h4>
+                    
+                    {% if categoria.descripcion %}
+                    <p class="card-text text-muted">
+                        {{ categoria.descripcion|truncatechars:100 }}
+                    </p>
+                    {% endif %}
+                    
+                    <a href="{% url 'tienda:productos' %}?categoria={{ categoria.id }}" 
+                       class="btn btn-primary mt-2">
+                        <i class="fas fa-eye me-2"></i>Ver Productos
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="empty-state">
+                <i class="fas fa-tags fa-4x mb-4"></i>
+                <h3>No hay categorías disponibles</h3>
+                <p>Pronto agregaremos nuevas categorías.</p>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

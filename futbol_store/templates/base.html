@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Tienda de Fútbol{% endblock %}</title>
+    
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        body {
+            padding-top: 70px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        main {
+            flex: 1;
+        }
+        
+        .navbar-brand {
+            font-weight: bold;
+            color: #ff6b00 !important;
+        }
+        
+        .card {
+            transition: transform 0.3s;
+            border: none;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 20px;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.2);
+        }
+        
+        .producto-img {
+            height: 250px;
+            object-fit: cover;
+            width: 100%;
+        }
+        
+        .badge-oferta {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #dc3545;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .badge-nuevo {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: #28a745;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .carrito-icon {
+            position: relative;
+        }
+        
+        .carrito-count {
+            position: absolute;
+            top: -8px;
+            right: -8px;
+            background: #ff6b00;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .footer {
+            background: #2c3e50;
+            color: white;
+            padding: 40px 0 20px;
+            margin-top: auto;
+            width: 100%;
+        }
+        
+        .footer h5 {
+            color: #ff6b00;
+            margin-bottom: 20px;
+        }
+        
+        .footer-links a {
+            color: #ddd;
+            text-decoration: none;
+            display: block;
+            margin-bottom: 8px;
+            transition: color 0.3s;
+        }
+        
+        .footer-links a:hover {
+            color: #ff6b00;
+        }
+        
+        .social-icons a {
+            color: white;
+            margin-right: 15px;
+            font-size: 1.2rem;
+            transition: color 0.3s;
+        }
+        
+        .social-icons a:hover {
+            color: #ff6b00;
+        }
+        
+        .copyright {
+            border-top: 1px solid rgba(255,255,255,0.1);
+            padding-top: 20px;
+            margin-top: 30px;
+            text-align: center;
+            color: #aaa;
+            font-size: 0.9rem;
+        }
+        
+        .categoria-card {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-bottom: 20px;
+            height: 150px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .precio-original {
+            text-decoration: line-through;
+            color: #999;
+            font-size: 0.9em;
+        }
+        
+        .hero-section {
+            background: linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
+                        url('https://images.unsplash.com/photo-1575361204480-aadea25e6e68?ixlib=rb-4.0.3&auto=format&fit=crop&w=1600&q=80');
+            background-size: cover;
+            background-position: center;
+            color: white;
+            padding: 80px 0;
+            text-align: center;
+        }
+        
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            color: #007bff;
+        }
+        
+        .btn-custom {
+            background: #ff6b00;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 5px;
+            transition: background 0.3s;
+        }
+        
+        .btn-custom:hover {
+            background: #e55a00;
+            color: white;
+        }
+        
+        .page-title {
+            border-bottom: 3px solid #ff6b00;
+            padding-bottom: 10px;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        
+        .form-control:focus {
+            border-color: #ff6b00;
+            box-shadow: 0 0 0 0.2rem rgba(255, 107, 0, 0.25);
+        }
+        
+        .table-hover tbody tr:hover {
+            background-color: rgba(255, 107, 0, 0.1);
+        }
+        
+        .alert {
+            border-radius: 8px;
+            border: none;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #666;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            color: #ddd;
+            margin-bottom: 20px;
+        }
+    </style>
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'inicio' %}">
+                <i class="fas fa-futbol me-2"></i>FUTBOL STORE
+            </a>
+            
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'inicio' %}">
+                            <i class="fas fa-home"></i> Inicio
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'tienda:productos' %}">
+                            <i class="fas fa-store"></i> Tienda
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'tienda:categorias' %}">
+                            <i class="fas fa-list"></i> Categorías
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-fire"></i> Ofertas
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">
+                            <i class="fas fa-headset"></i> Contacto
+                        </a>
+                    </li>
+                </ul>
+                
+                <ul class="navbar-nav">
+                    <!-- Carrito -->
+                    <li class="nav-item me-3">
+                        <a class="nav-link carrito-icon" href="{% url 'carrito:ver_carrito' %}">
+                            <i class="fas fa-shopping-cart fa-lg"></i>
+                            {% if request.session.carrito_cantidad and request.session.carrito_cantidad > 0 %}
+                            <span class="carrito-count">{{ request.session.carrito_cantidad }}</span>
+                            {% endif %}
+                        </a>
+                    </li>
+                    
+                    <!-- Usuario -->
+                    {% if user.is_authenticated %}
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                            <i class="fas fa-user-circle"></i> {{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu">
+                            {% if user.perfil.es_admin %}
+                            <li><a class="dropdown-item" href="/admin/">
+                                <i class="fas fa-tachometer-alt"></i> Panel Admin
+                            </a></li>
+                            {% endif %}
+                            <li><a class="dropdown-item" href="{% url 'usuarios:perfil' %}">
+                                <i class="fas fa-user"></i> Mi Perfil
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'usuarios:pedidos' %}">
+                                <i class="fas fa-shopping-bag"></i> Mis Pedidos
+                            </a></li>
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{% url 'usuarios:logout' %}">
+                                <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                            </a></li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li class="nav-item">
+                        <a class="btn btn-outline-light me-2" href="{% url 'usuarios:login' %}">
+                            <i class="fas fa-sign-in-alt"></i> Iniciar Sesión
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-warning" href="{% url 'usuarios:registro' %}">
+                            <i class="fas fa-user-plus"></i> Registrarse
+                        </a>
+                    </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Mensajes -->
+    {% if messages %}
+    <div class="container mt-4">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Contenido Principal -->
+    <main class="py-4">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <h5><i class="fas fa-futbol me-2"></i>FUTBOL STORE</h5>
+                    <p>Tu tienda online especializada en artículos de fútbol. Las mejores marcas, los mejores precios, envíos a todo México.</p>
+                    <div class="social-icons mt-3">
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-whatsapp"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-2 col-md-6 mb-4">
+                    <h5>Enlaces Rápidos</h5>
+                    <div class="footer-links">
+                        <a href="{% url 'inicio' %}">Inicio</a>
+                        <a href="{% url 'tienda:productos' %}">Tienda</a>
+                        <a href="{% url 'tienda:categorias' %}">Categorías</a>
+                        <a href="#">Ofertas</a>
+                        <a href="#">Nuevos Productos</a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h5>Mi Cuenta</h5>
+                    <div class="footer-links">
+                        {% if user.is_authenticated %}
+                        <a href="{% url 'usuarios:perfil' %}">Mi Perfil</a>
+                        <a href="{% url 'usuarios:pedidos' %}">Mis Pedidos</a>
+                        <a href="{% url 'carrito:ver_carrito' %}">Mi Carrito</a>
+                        {% else %}
+                        <a href="{% url 'usuarios:login' %}">Iniciar Sesión</a>
+                        <a href="{% url 'usuarios:registro' %}">Registrarse</a>
+                        {% endif %}
+                        <a href="#">Mis Favoritos</a>
+                        <a href="#">Historial</a>
+                    </div>
+                </div>
+                
+                <div class="col-lg-3 col-md-6 mb-4">
+                    <h5>Contacto</h5>
+                    <div class="footer-contact">
+                        <p><i class="fas fa-map-marker-alt me-2"></i> Av. Fútbol 123, Col. Deportiva, CDMX</p>
+                        <p><i class="fas fa-phone me-2"></i> (55) 1234-5678</p>
+                        <p><i class="fas fa-envelope me-2"></i> info@futbolstore.com</p>
+                        <p><i class="fas fa-clock me-2"></i> Lunes a Viernes: 9:00 - 18:00</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                <p>&copy; 2024 <strong>DÍAZ GALLEGOS CHRISTIAN JESUS 5.I</strong> - Todos los derechos reservados.</p>
+                <p>Fecha: <span id="fecha-actual"></span></p>
+                <p>Proyecto Django - Tienda de Fútbol</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
+    {% block extra_js %}{% endblock %}
+    
+    <script>
+        $(document).ready(function() {
+            // Auto-ocultar alertas después de 5 segundos
+            setTimeout(function() {
+                $('.alert').alert('close');
+            }, 5000);
+            
+            // Mostrar fecha actual
+            function actualizarFecha() {
+                var ahora = new Date();
+                var opciones = { 
+                    weekday: 'long', 
+                    year: 'numeric', 
+                    month: 'long', 
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                };
+                var fecha = ahora.toLocaleDateString('es-MX', opciones);
+                $('#fecha-actual').text(fecha);
+            }
+            actualizarFecha();
+            setInterval(actualizarFecha, 60000); // Actualizar cada minuto
+            
+            // Actualizar cantidad en carrito
+            $('.actualizar-cantidad').on('change', function() {
+                var itemId = $(this).data('item-id');
+                var cantidad = $(this).val();
+                var url = '/carrito/actualizar/' + itemId + '/';
+                
+                if (cantidad > 0) {
+                    $.ajax({
+                        url: url,
+                        type: 'POST',
+                        data: {
+                            'cantidad': cantidad,
+                            'csrfmiddlewaretoken': '{{ csrf_token }}'
+                        },
+                        success: function(response) {
+                            location.reload();
+                        },
+                        error: function() {
+                            alert('Error al actualizar la cantidad');
+                        }
+                    });
+                }
+            });
+            
+            // Confirmar vaciar carrito
+            $('.vaciar-carrito').on('click', function(e) {
+                if (!confirm('¿Estás seguro de que quieres vaciar el carrito?')) {
+                    e.preventDefault();
+                }
+            });
+            
+            // Confirmar eliminar producto
+            $('.eliminar-producto').on('click', function(e) {
+                if (!confirm('¿Estás seguro de que quieres eliminar este producto?')) {
+                    e.preventDefault();
+                }
+            });
+        });
+    </script>
+</body>
+</html>

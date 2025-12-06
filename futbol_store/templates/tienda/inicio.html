@@ -1,0 +1,304 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Inicio - Futbol Store{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-8 mx-auto text-center">
+                <h1 class="display-4 fw-bold mb-4">TODO EN ARTÍCULOS DE FÚTBOL</h1>
+                <p class="lead mb-4">Las mejores marcas al mejor precio. Camisetas, balones, botines y mucho más. ¡Envíos a todo el país!</p>
+                <div class="d-flex justify-content-center gap-3">
+                    <a href="{% url 'tienda:productos' %}" class="btn btn-warning btn-lg">
+                        <i class="fas fa-shopping-bag me-2"></i>COMPRAR AHORA
+                    </a>
+                    <a href="#ofertas" class="btn btn-outline-light btn-lg">
+                        <i class="fas fa-fire me-2"></i>VER OFERTAS
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Categorías -->
+<div class="container py-5">
+    <h2 class="text-center page-title">CATEGORÍAS DESTACADAS</h2>
+    <div class="row">
+        <div class="col-md-4 mb-4">
+            <div class="categoria-card">
+                <h4><i class="fas fa-tshirt me-2"></i>Camisetas</h4>
+                <p>Equipaciones oficiales y réplicas</p>
+                <a href="{% url 'tienda:productos' %}?categoria=1" class="btn btn-light btn-sm mt-2">
+                    Ver Productos
+                </a>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="categoria-card" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">
+                <h4><i class="fas fa-futbol me-2"></i>Balones</h4>
+                <p>Balones oficiales y entrenamiento</p>
+                <a href="{% url 'tienda:productos' %}?categoria=2" class="btn btn-light btn-sm mt-2">
+                    Ver Productos
+                </a>
+            </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="categoria-card" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">
+                <h4><i class="fas fa-shoe-prints me-2"></i>Botines</h4>
+                <p>Para todo tipo de superficies</p>
+                <a href="{% url 'tienda:productos' %}?categoria=3" class="btn btn-light btn-sm mt-2">
+                    Ver Productos
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Productos Destacados -->
+<div class="container py-5">
+    <h2 class="text-center page-title">PRODUCTOS DESTACADOS</h2>
+    <div class="row">
+        {% if productos_destacados %}
+            {% for producto in productos_destacados %}
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div class="card h-100">
+                    {% if producto.en_oferta %}
+                    <span class="badge-oferta">{{ producto.porcentaje_descuento }}% OFF</span>
+                    {% endif %}
+                    {% if producto.nuevo %}
+                    <span class="badge-nuevo">NUEVO</span>
+                    {% endif %}
+                    
+                    {% if producto.imagen %}
+                    <img src="{{ producto.imagen.url }}" class="card-img-top producto-img" alt="{{ producto.nombre }}">
+                    {% else %}
+                    <img src="https://via.placeholder.com/300x250/ccc/fff?text=Sin+Imagen" 
+                         class="card-img-top producto-img" alt="Sin imagen">
+                    {% endif %}
+                    
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ producto.nombre|truncatechars:30 }}</h5>
+                        <p class="card-text text-muted small">
+                            <i class="fas fa-tag me-1"></i>{{ producto.marca }} 
+                            | <i class="fas fa-ruler me-1"></i>Talla: {{ producto.talla }}
+                        </p>
+                        
+                        <div class="mt-auto">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    {% if producto.en_oferta %}
+                                    <small class="precio-original">${{ producto.precio_original }}</small>
+                                    <br>
+                                    {% endif %}
+                                    <span class="h5 text-primary fw-bold">${{ producto.precio }}</span>
+                                </div>
+                                <span class="badge {% if producto.stock > 10 %}bg-success{% else %}bg-warning{% endif %}">
+                                    Stock: {{ producto.stock }}
+                                </span>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'tienda:detalle_producto' producto.id %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-eye me-1"></i>Ver Detalles
+                                </a>
+                                <form method="post" action="{% url 'carrito:agregar' producto.id %}" class="d-grid">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-success">
+                                        <i class="fas fa-cart-plus me-1"></i>Agregar al Carrito
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="empty-state">
+                    <i class="fas fa-box-open"></i>
+                    <h3>No hay productos destacados</h3>
+                    <p>Pronto agregaremos nuevos productos destacados.</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+    <div class="text-center mt-4">
+        <a href="{% url 'tienda:productos' %}" class="btn btn-primary btn-lg">
+            <i class="fas fa-store me-2"></i>Ver Todos los Productos
+        </a>
+    </div>
+</div>
+
+<!-- Ofertas Especiales -->
+<div class="container py-5" id="ofertas">
+    <h2 class="text-center page-title">OFERTAS ESPECIALES</h2>
+    <div class="row">
+        {% if productos_oferta %}
+            {% for producto in productos_oferta %}
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div class="card h-100 border-danger">
+                    <span class="badge-oferta">{{ producto.porcentaje_descuento }}% OFF</span>
+                    
+                    {% if producto.imagen %}
+                    <img src="{{ producto.imagen.url }}" class="card-img-top producto-img" alt="{{ producto.nombre }}">
+                    {% else %}
+                    <img src="https://via.placeholder.com/300x250/ccc/fff?text=Sin+Imagen" 
+                         class="card-img-top producto-img" alt="Sin imagen">
+                    {% endif %}
+                    
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title text-danger">{{ producto.nombre|truncatechars:30 }}</h5>
+                        <p class="card-text text-muted small">
+                            <i class="fas fa-tag me-1"></i>{{ producto.marca }}
+                        </p>
+                        
+                        <div class="mt-auto">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <div>
+                                    <small class="precio-original">${{ producto.precio_original }}</small>
+                                    <br>
+                                    <span class="h4 text-danger fw-bold">${{ producto.precio }}</span>
+                                </div>
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <a href="{% url 'tienda:detalle_producto' producto.id %}" class="btn btn-outline-danger">
+                                    <i class="fas fa-eye me-1"></i>Ver Oferta
+                                </a>
+                                <form method="post" action="{% url 'carrito:agregar' producto.id %}" class="d-grid">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="cantidad" value="1">
+                                    <button type="submit" class="btn btn-danger">
+                                        <i class="fas fa-bolt me-1"></i>Comprar Oferta
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="empty-state">
+                    <i class="fas fa-fire"></i>
+                    <h3>No hay ofertas disponibles</h3>
+                    <p>Vuelve pronto para ver nuestras ofertas especiales.</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Por qué elegirnos -->
+<div class="container py-5">
+    <h2 class="text-center page-title">¿POR QUÉ ELEGIR FUTBOL STORE?</h2>
+    <div class="row text-center">
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="p-4 border rounded h-100">
+                <i class="fas fa-shipping-fast fa-3x text-primary mb-3"></i>
+                <h5>Envío Rápido</h5>
+                <p>Envíos express a todo el país en 24-48 horas. Seguimiento en tiempo real.</p>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="p-4 border rounded h-100">
+                <i class="fas fa-shield-alt fa-3x text-success mb-3"></i>
+                <h5>Pago 100% Seguro</h5>
+                <p>Transacciones protegidas con encriptación SSL. Varios métodos de pago.</p>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="p-4 border rounded h-100">
+                <i class="fas fa-undo fa-3x text-warning mb-3"></i>
+                <h5>30 Días Devolución</h5>
+                <p>Si no estás satisfecho, te devolvemos tu dinero hasta 30 días después.</p>
+            </div>
+        </div>
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="p-4 border rounded h-100">
+                <i class="fas fa-headset fa-3x text-info mb-3"></i>
+                <h5>Soporte 24/7</h5>
+                <p>Atención personalizada por WhatsApp, teléfono y email. Siempre disponibles.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Nuevos Productos -->
+<div class="container py-5">
+    <h2 class="text-center page-title">NUEVOS PRODUCTOS</h2>
+    <div class="row">
+        {% if nuevos_productos %}
+            {% for producto in nuevos_productos %}
+            <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
+                <div class="card h-100">
+                    <span class="badge-nuevo">NUEVO</span>
+                    
+                    {% if producto.imagen %}
+                    <img src="{{ producto.imagen.url }}" class="card-img-top producto-img" alt="{{ producto.nombre }}">
+                    {% else %}
+                    <img src="https://via.placeholder.com/300x250/ccc/fff?text=Sin+Imagen" 
+                         class="card-img-top producto-img" alt="Sin imagen">
+                    {% endif %}
+                    
+                    <div class="card-body d-flex flex-column">
+                        <h5 class="card-title">{{ producto.nombre|truncatechars:30 }}</h5>
+                        
+                        <div class="mt-auto">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <span class="h5 text-primary fw-bold">${{ producto.precio }}</span>
+                                <span class="badge bg-info">{{ producto.marca }}</span>
+                            </div>
+                            
+                            <div class="d-grid">
+                                <a href="{% url 'tienda:detalle_producto' producto.id %}" class="btn btn-outline-primary">
+                                    <i class="fas fa-rocket me-1"></i>Ver Novedad
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="col-12">
+                <div class="empty-state">
+                    <i class="fas fa-star"></i>
+                    <h3>No hay productos nuevos</h3>
+                    <p>Estamos trabajando en agregar nuevos productos.</p>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<!-- Newsletter -->
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card bg-primary text-white">
+                <div class="card-body text-center p-5">
+                    <h3 class="card-title mb-4">¡Suscríbete a nuestro newsletter!</h3>
+                    <p class="card-text mb-4">Recibe las mejores ofertas, nuevos productos y descuentos exclusivos en tu correo.</p>
+                    <form class="row g-3 justify-content-center">
+                        <div class="col-md-8">
+                            <input type="email" class="form-control form-control-lg" placeholder="Tu correo electrónico" required>
+                        </div>
+                        <div class="col-md-auto">
+                            <button type="submit" class="btn btn-warning btn-lg">
+                                <i class="fas fa-paper-plane me-2"></i>Suscribirse
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

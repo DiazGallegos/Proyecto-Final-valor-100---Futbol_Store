@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+
+{% block title %}Checkout - Futbol Store{% endblock %}
+
+{% block extra_css %}
+<style>
+    .step {
+        display: flex;
+        align-items: center;
+        margin-bottom: 30px;
+    }
+    .step-number {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: #ddd;
+        color: #666;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        margin-right: 15px;
+    }
+    .step.active .step-number {
+        background: #ff6b00;
+        color: white;
+    }
+    .step.completed .step-number {
+        background: #28a745;
+        color: white;
+    }
+    .step-content {
+        flex: 1;
+    }
+    .form-section {
+        background: #f8f9fa;
+        padding: 25px;
+        border-radius: 10px;
+        margin-bottom: 25px;
+        border: 1px solid #e9ecef;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="page-title">Finalizar Compra</h1>
+    
+    <!-- Pasos del checkout -->
+    <div class="row mb-5">
+        <div class="col-12">
+            <div class="step active">
+                <div class="step-number">1</div>
+                <div class="step-content">
+                    <h5 class="mb-1">Información de envío</h5>
+                    <p class="text-muted mb-0">Ingresa tu dirección de envío</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">2</div>
+                <div class="step-content">
+                    <h5 class="mb-1">Método de pago</h5>
+                    <p class="text-muted mb-0">Selecciona cómo quieres pagar</p>
+                </div>
+            </div>
+            <div class="step">
+                <div class="step-number">3</div>
+                <div class="step-content">
+                    <h5 class="mb-1">Revisar y confirmar</h5>
+                    <p class="text-muted mb-0">Revisa tu pedido antes de pagar</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <!-- Formulario -->
+        <div class="col-lg-8">
+            <form method="post" action="{% url 'pedidos:crear_pedido' %}">
+                {% csrf_token %}
+                
+                <!-- Información de envío -->
+                <div class="form-section">
+                    <h4 class="mb-4"><i class="fas fa-truck me-2"></i>Información de Envío</h4>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Nombre completo *</label>
+                            <input type="text" class="form-control" name="nombre" 
+                                   value="{{ user.get_full_name }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Teléfono *</label>
+                            <input type="tel" class="form-control" name="telefono" 
+                                   value="{{ user.perfil.telefono }}" required>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Dirección *</label>
+                        <textarea class="form-control" name="direccion" rows="3" required>{{ user.perfil.direccion }}</textarea>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Ciudad *</label>
+                            <input type="text" class="form-control" name="ciudad" 
+                                   value="{{ user.perfil.ciudad }}" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Código Postal *</label>
+                            <input type="text" class="form-control" name="codigo_postal" 
+                                   value="{{ user.perfil.codigo_postal }}" required>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Método de pago -->
+                <div class="form-section">
+                    <h4 class="mb-4"><i class="fas fa-credit-card me-2"></i>Método de Pago</h4>
+                    
+                    <div class="mb-3">
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="metodo_pago" id="tarjeta" value="TARJETA" checked>
+                            <label class="form-check-label" for="tarjeta">
+                                <i class="fas fa-credit-card me-2"></i>Tarjeta de crédito/débito
+                            </label>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="metodo_pago" id="efectivo" value="EFECTIVO">
+                            <label class="form-check-label" for="efectivo">
+                                <i class="fas fa-money-bill-wave me-2"></i>Efectivo al recibir
+                            </label>
+                        </div>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="radio" name="metodo_pago" id="transferencia" value="TRANSFERENCIA">
+                            <label class="form-check-label" for="transferencia">
+                                <i class="fas fa-university me-2"></i>Transferencia bancaria
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Para tarjeta -->
+                    <div id="tarjeta-info">
+                        <div class="row">
+                            <div class="col-12 mb-3">
+                                <label class="form-label">Número de tarjeta *</label>
+                                <div class="input-group">
+                                    <input type="text" class="form-control" placeholder="1234 5678 9012 3456">
+                                    <span class="input-group-text">
+                                        <i class="fab fa-cc-visa"></i>
+                                        <i class="fab fa-cc-mastercard ms-2"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Fecha de expiración *</label>
+                                <input type="text" class="form-control" placeholder="MM/AA">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">CVV *</label>
+                                <input type="text" class="form-control" placeholder="123">
+                            </div>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Nombre en la tarjeta *</label>
+                            <input type="text" class="form-control" placeholder="Como aparece en la tarjeta">
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Notas -->
+                <div class="form-section">
+                    <h4 class="mb-4"><i class="fas fa-sticky-note me-2"></i>Notas adicionales</h4>
+                    <div class="mb-3">
+                        <label class="form-label">Instrucciones especiales para la entrega (opcional)</label>
+                        <textarea class="form-control" name="notas" rows="3" 
+                                  placeholder="Ej: Dejar con el portero, llamar antes de llegar, etc."></textarea>
+                    </div>
+                </div>
+                
+                <!-- Botones -->
+                <div class="d-flex justify-content-between">
+                    <a href="{% url 'carrito:ver_carrito' %}" class="btn btn-outline-secondary">
+                        <i class="fas fa-arrow-left me-2"></i>Volver al carrito
+                    </a>
+                    <button type="submit" class="btn btn-success btn-lg">
+                        <i class="fas fa-lock me-2"></i>PAGAR ${{ carrito.total }}
+                    </button>
+                </div>
+            </form>
+        </div>
+        
+        <!-- Resumen del pedido -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-shopping-bag me-2"></i>Resumen del Pedido</h5>
+                </div>
+                <div class="card-body">
+                    <!-- Productos -->
+                    <h6>Productos</h6>
+                    {% for item in carrito.items.all %}
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <div>
+                            <small>{{ item.producto.nombre|truncatechars:30 }}</small>
+                            <br>
+                            <small class="text-muted">{{ item.cantidad }} x ${{ item.producto.precio }}</small>
+                        </div>
+                        <small>${{ item.subtotal }}</small>
+                    </div>
+                    {% endfor %}
+                    
+                    <hr>
+                    
+                    <!-- Totales -->
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Subtotal:</span>
+                        <span>${{ carrito.total }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Envío:</span>
+                        <span class="text-success">Gratis</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Impuestos:</span>
+                        <span>$0.00</span>
+                    </div>
+                    <div class="d-flex justify-content-between fw-bold fs-5">
+                        <span>Total:</span>
+                        <span>${{ carrito.total }}</span>
+                    </div>
+                    
+                    <hr>
+                    
+                    <!-- Información de seguridad -->
+                    <div class="alert alert-success">
+                        <h6><i class="fas fa-shield-alt me-2"></i>Compra 100% Segura</h6>
+                        <small class="text-muted">
+                            Tus datos están protegidos con encriptación SSL. No almacenamos información de tu tarjeta.
+                        </small>
+                    </div>
+                    
+                    <div class="text-center">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b7/Google_Pay_Logo.svg/1200px-Google_Pay_Logo.svg.png" 
+                             height="30" class="me-2" alt="Google Pay">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/b/b5/PayPal.svg/1200px-PayPal.svg.png" 
+                             height="30" class="me-2" alt="PayPal">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Visa_Inc._logo.svg/1200px-Visa_Inc._logo.svg.png" 
+                             height="30" class="me-2" alt="Visa">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/2/2a/Mastercard-logo.svg/1200px-Mastercard-logo.svg.png" 
+                             height="30" alt="Mastercard">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Políticas -->
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h6><i class="fas fa-info-circle me-2"></i>Nuestras políticas</h6>
+                    <small class="text-muted">
+                        <i class="fas fa-check text-success me-1"></i> 30 días para devoluciones<br>
+                        <i class="fas fa-check text-success me-1"></i> Envío gratis en compras mayores a $500<br>
+                        <i class="fas fa-check text-success me-1"></i> Soporte 24/7<br>
+                        <i class="fas fa-check text-success me-1"></i> Garantía de autenticidad
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        // Mostrar/ocultar información de tarjeta
+        $('input[name="metodo_pago"]').change(function() {
+            if ($(this).val() === 'TARJETA') {
+                $('#tarjeta-info').show();
+            } else {
+                $('#tarjeta-info').hide();
+            }
+        });
+        
+        // Validación básica
+        $('form').submit(function(e) {
+            var metodoPago = $('input[name="metodo_pago"]:checked').val();
+            
+            if (metodoPago === 'TARJETA') {
+                // Aquí iría la validación de tarjeta
+                // Por ahora solo validamos que los campos no estén vacíos
+            }
+            
+            // Podrías agregar más validaciones aquí
+        });
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+
+{% block title %}Confirmación de Pedido - Futbol Store{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card text-center border-success">
+                <div class="card-header bg-success text-white">
+                    <h3 class="mb-0"><i class="fas fa-check-circle me-2"></i>¡Pedido Confirmado!</h3>
+                </div>
+                <div class="card-body py-5">
+                    <div class="mb-4">
+                        <i class="fas fa-check-circle fa-5x text-success mb-4"></i>
+                        <h2 class="mb-3">Gracias por tu compra</h2>
+                        <p class="lead">Tu pedido ha sido procesado exitosamente.</p>
+                    </div>
+                    
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">Número de pedido: <strong>#{{ pedido.id|default:"12345" }}</strong></h5>
+                            <p class="card-text">
+                                Hemos enviado un correo de confirmación a <strong>{{ user.email }}</strong> con los detalles de tu pedido.
+                            </p>
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                <strong>Tiempo de entrega estimado:</strong> 3-5 días hábiles
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row text-start mb-4">
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-truck me-2"></i>Información de envío</h5>
+                            <p class="mb-1"><strong>Dirección:</strong> {{ pedido.direccion_envio|default:"Calle Ejemplo 123" }}</p>
+                            <p class="mb-1"><strong>Ciudad:</strong> {{ pedido.ciudad|default:"Ciudad de México" }}</p>
+                            <p class="mb-1"><strong>Código Postal:</strong> {{ pedido.codigo_postal|default:"01000" }}</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5><i class="fas fa-credit-card me-2"></i>Información de pago</h5>
+                            <p class="mb-1"><strong>Método:</strong> {{ pedido.get_metodo_pago_display|default:"Tarjeta de crédito" }}</p>
+                            <p class="mb-1"><strong>Total:</strong> ${{ pedido.total|default:"999.00" }}</p>
+                            <p class="mb-1"><strong>Estado:</strong> <span class="badge bg-warning">Procesando</span></p>
+                        </div>
+                    </div>
+                    
+                    <div class="d-grid gap-3">
+                        <a href="{% url 'usuarios:pedidos' %}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-shopping-bag me-2"></i>Ver Mis Pedidos
+                        </a>
+                        <a href="{% url 'tienda:productos' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-store me-2"></i>Seguir Comprando
+                        </a>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <p class="text-muted">
+                            ¿Tienes alguna pregunta? 
+                            <a href="#">Contáctanos</a> y con gusto te ayudaremos.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

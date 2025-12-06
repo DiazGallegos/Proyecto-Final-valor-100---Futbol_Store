@@ -1,0 +1,242 @@
+{% extends 'base.html' %}
+
+{% block title %}Panel de Administración - Futbol Store{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h1 class="page-title">Panel de Administración</h1>
+    
+    <!-- Estadísticas -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-primary h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-primary mb-0">Total Productos</h6>
+                            <h2 class="mb-0">{{ total_productos }}</h2>
+                        </div>
+                        <i class="fas fa-box fa-3x text-primary"></i>
+                    </div>
+                    <small class="text-muted">{{ productos_activos }} activos</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-success mb-0">Total Pedidos</h6>
+                            <h2 class="mb-0">{{ total_pedidos }}</h2>
+                        </div>
+                        <i class="fas fa-shopping-bag fa-3x text-success"></i>
+                    </div>
+                    <small class="text-muted">{{ pedidos_pendientes }} pendientes</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-warning mb-0">Productos Sin Stock</h6>
+                            <h2 class="mb-0">{{ productos_sin_stock }}</h2>
+                        </div>
+                        <i class="fas fa-exclamation-triangle fa-3x text-warning"></i>
+                    </div>
+                    <small class="text-muted">Necesitan atención</small>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="text-info mb-0">Pedidos Procesando</h6>
+                            <h2 class="mb-0">{{ pedidos_procesando }}</h2>
+                        </div>
+                        <i class="fas fa-truck fa-3x text-info"></i>
+                    </div>
+                    <small class="text-muted">En preparación</small>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Acciones rápidas -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-bolt me-2"></i>Acciones Rápidas</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="/admin/tienda/producto/add/" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Agregar Producto
+                        </a>
+                        <a href="/admin/tienda/producto/" class="btn btn-success">
+                            <i class="fas fa-edit me-2"></i>Gestionar Productos
+                        </a>
+                        <a href="/admin/pedidos/pedido/" class="btn btn-info">
+                            <i class="fas fa-shopping-bag me-2"></i>Ver Pedidos
+                        </a>
+                        <a href="/admin/auth/user/" class="btn btn-warning">
+                            <i class="fas fa-users me-2"></i>Gestionar Usuarios
+                        </a>
+                        <a href="/admin/tienda/categoria/add/" class="btn btn-secondary">
+                            <i class="fas fa-tags me-2"></i>Agregar Categoría
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Últimos pedidos -->
+    <div class="row">
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0"><i class="fas fa-history me-2"></i>Últimos Pedidos</h5>
+                    <a href="/admin/pedidos/pedido/" class="btn btn-sm btn-outline-primary">
+                        Ver Todos
+                    </a>
+                </div>
+                <div class="card-body">
+                    {% if ultimos_pedidos %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Cliente</th>
+                                    <th>Fecha</th>
+                                    <th>Total</th>
+                                    <th>Estado</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for pedido in ultimos_pedidos %}
+                                <tr>
+                                    <td><strong>#{{ pedido.id }}</strong></td>
+                                    <td>{{ pedido.cliente.username }}</td>
+                                    <td>{{ pedido.fecha_pedido|date:"d/m/Y H:i" }}</td>
+                                    <td>${{ pedido.total }}</td>
+                                    <td>
+                                        {% if pedido.estado == 'PENDIENTE' %}
+                                        <span class="badge bg-warning">{{ pedido.get_estado_display }}</span>
+                                        {% elif pedido.estado == 'PROCESANDO' %}
+                                        <span class="badge bg-info">{{ pedido.get_estado_display }}</span>
+                                        {% elif pedido.estado == 'ENVIADO' %}
+                                        <span class="badge bg-primary">{{ pedido.get_estado_display }}</span>
+                                        {% elif pedido.estado == 'ENTREGADO' %}
+                                        <span class="badge bg-success">{{ pedido.get_estado_display }}</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="/admin/pedidos/pedido/{{ pedido.id }}/change/" 
+                                           class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-shopping-bag fa-3x text-muted mb-3"></i>
+                        <p class="text-muted">No hay pedidos recientes</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <!-- Información del sistema -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Información del Sistema</h5>
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Proyecto
+                            <span class="badge bg-primary">Futbol Store</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Versión
+                            <span class="badge bg-secondary">1.0.0</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Desarrollador
+                            <span class="text-primary">Díaz Gallegos Christian Jesús 5.I</span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Fecha del Sistema
+                            <span id="fecha-sistema"></span>
+                        </li>
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            Usuarios Activos
+                            <span class="badge bg-success">{{ usuarios_activos|default:"0" }}</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Enlaces útiles -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="fas fa-link me-2"></i>Enlaces Útiles</h5>
+                </div>
+                <div class="card-body">
+                    <div class="list-group list-group-flush">
+                        <a href="/admin/" class="list-group-item list-group-item-action">
+                            <i class="fas fa-tachometer-alt me-2"></i>Panel Django Admin
+                        </a>
+                        <a href="{% url 'tienda:productos' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-store me-2"></i>Ir a la Tienda
+                        </a>
+                        <a href="{% url 'inicio' %}" class="list-group-item list-group-item-action">
+                            <i class="fas fa-home me-2"></i>Página Principal
+                        </a>
+                        <a href="/admin/logout/" class="list-group-item list-group-item-action text-danger">
+                            <i class="fas fa-sign-out-alt me-2"></i>Cerrar Sesión Admin
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $(document).ready(function() {
+        // Actualizar fecha del sistema
+        function actualizarFechaSistema() {
+            var ahora = new Date();
+            var fecha = ahora.toLocaleDateString('es-MX', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit'
+            });
+            $('#fecha-sistema').text(fecha);
+        }
+        actualizarFechaSistema();
+        setInterval(actualizarFechaSistema, 1000);
+    });
+</script>
+{% endblock %}

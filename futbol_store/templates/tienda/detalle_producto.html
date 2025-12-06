@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+
+{% block title %}Carrito de Compras - Futbol Store{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="page-title">Carrito de Compras</h1>
+    
+    {% if items %}
+    <div class="row">
+        <!-- Lista de productos -->
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-shopping-cart me-2"></i>Productos en tu carrito</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Precio</th>
+                                    <th>Cantidad</th>
+                                    <th>Subtotal</th>
+                                    <th>Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in items %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            {% if item.producto.imagen %}
+                                            <img src="{{ item.producto.imagen.url }}" 
+                                                 class="img-thumbnail me-3" 
+                                                 style="width: 80px; height: 80px; object-fit: cover;">
+                                            {% else %}
+                                            <img src="https://via.placeholder.com/80x80/ccc/fff?text=Sin+Imagen" 
+                                                 class="img-thumbnail me-3">
+                                            {% endif %}
+                                            <div>
+                                                <h6 class="mb-1">{{ item.producto.nombre }}</h6>
+                                                <small class="text-muted">
+                                                    {{ item.producto.marca }} - Talla: {{ item.producto.talla }}
+                                                </small>
+                                                <br>
+                                                <small class="text-muted">
+                                                    Stock disponible: {{ item.producto.stock }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="align-middle">
+                                        <span class="h6">${{ item.producto.precio }}</span>
+                                    </td>
+                                    <td class="align-middle" style="width: 150px;">
+                                        <form method="post" action="{% url 'carrito:actualizar' item.id %}">
+                                            {% csrf_token %}
+                                            <div class="input-group">
+                                                <select name="cantidad" class="form-select actualizar-cantidad" data-item-id="{{ item.id }}">
+                                                    {% for i in "123456789"|make_list %}
+                                                        {% with num=forloop.counter %}
+                                                            {% if num <= item.producto.stock and num <= 10 %}
+                                                            <option value="{{ num }}" {% if item.cantidad == num %}selected{% endif %}>
+                                                                {{ num }}
+                                                            </option>
+                                                            {% endif %}
+                                                        {% endwith %}
+                                                    {% endfor %}
+                                                </select>
+                                            </div>
+                                        </form>
+                                    </td>
+                                    <td class="align-middle">
+                                        <span class="h6 text-primary">${{ item.subtotal }}</span>
+                                    </td>
+                                    <td class="align-middle">
+                                        <form method="post" action="{% url 'carrito:eliminar' item.id %}" class="d-inline">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-danger btn-sm eliminar-producto" title="Eliminar">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="d-flex justify-content-between mt-3">
+                        <a href="{% url 'tienda:productos' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-arrow-left me-2"></i>Seguir Comprando
+                        </a>
+                        <form method="post" action="{% url 'carrito:vaciar' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-outline-danger vaciar-carrito">
+                                <i class="fas fa-trash me-2"></i>Vaciar Carrito
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Resumen del pedido -->
+        <div class="col-lg-4">
+            <div class="card">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0"><i class="fas fa-receipt me-2"></i>Resumen del Pedido</h5>
+                </div>
+                <div class="card-body">
+                    <div class="mb-4">
+                        <h6>Detalles del pedido</h6>
+                        <table class="table table-sm">
+                            <tbody>
+                                <tr>
+                                    <td>Subtotal:</td>
+                                    <td class="text-end">${{ carrito.total }}</td>
+                                </tr>
+                                <tr>
+                                    <td>Envío:</td>
+                                    <td class="text-end text-success">Gratis</td>
+                                </tr>
+                                <tr>
+                                    <td>Descuento:</td>
+                                    <td class="text-end text-danger">$0.00</td>
+                                </tr>
+                                <tr class="table-active">
+                                    <th>Total:</th>
+                                    <th class="text-end">${{ carrito.total }}</th>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6>Método de envío</h6>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="envio" id="envio-estandar" checked>
+                            <label class="form-check-label" for="envio-estandar">
+                                Envío estándar (3-5 días) - Gratis
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="envio" id="envio-express">
+                            <label class="form-check-label" for="envio-express">
+                                Envío express (24-48 horas) - $99.00
+                            </label>
+                        </div>
+                    </div>
+                    
+                    {% if user.is_authenticated %}
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'carrito:checkout' %}" class="btn btn-success btn-lg">
+                            <i class="fas fa-lock me-2"></i>PROCEDER AL PAGO
+                        </a>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-circle me-2"></i>
+                        Para proceder al pago necesitas iniciar sesión.
+                    </div>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'usuarios:login' %}?next={% url 'carrito:checkout' %}" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt me-2"></i>Iniciar Sesión
+                        </a>
+                        <a href="{% url 'usuarios:registro' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-user-plus me-2"></i>Crear Cuenta
+                        </a>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="mt-4">
+                        <h6><i class="fas fa-shield-alt me-2"></i>Compra Segura</h6>
+                        <p class="small text-muted">
+                            <i class="fas fa-check text-success me-1"></i> Pago 100% seguro<br>
+                            <i class="fas fa-check text-success me-1"></i> Datos protegidos<br>
+                            <i class="fas fa-check text-success me-1"></i> Devolución garantizada
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Cupón de descuento -->
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h6 class="mb-0"><i class="fas fa-ticket-alt me-2"></i>Cupón de descuento</h6>
+                </div>
+                <div class="card-body">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Código del cupón">
+                        <button class="btn btn-outline-primary" type="button">Aplicar</button>
+                    </div>
+                    <small class="text-muted mt-2 d-block">
+                        ¿Tienes un cupón? Ingresa el código aquí.
+                    </small>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <!-- Carrito vacío -->
+    <div class="empty-state">
+        <i class="fas fa-shopping-cart fa-4x mb-4 text-muted"></i>
+        <h3>Tu carrito está vacío</h3>
+        <p class="mb-4">¡Aún no has agregado productos a tu carrito!</p>
+        <a href="{% url 'tienda:productos' %}" class="btn btn-primary btn-lg">
+            <i class="fas fa-store me-2"></i>Ir a la Tienda
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
